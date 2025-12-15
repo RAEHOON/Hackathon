@@ -92,4 +92,24 @@ interface ApiService {
         @Field("post_id") postId: Int
     ): Call<PostDetailResponse>
 
+
+    @FormUrlEncoded
+    @POST("check_id.php")
+    fun checkIdDuplicate(
+        @Field("loginid") loginId: String
+    ): Call<ApiResponse>
+
+    @FormUrlEncoded
+    @POST("check_nickname.php")
+    fun checkNicknameDuplicate(
+        @Field("nickname") nickname: String
+    ): Call<ApiResponse>
+
+    @FormUrlEncoded
+    @POST("check_email.php")
+    fun checkEmailDuplicate(
+        @Field("email") email: String
+    ): Call<ApiResponse>
+
+
 }
