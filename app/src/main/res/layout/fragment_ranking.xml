@@ -1,6 +1,161 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@android:color/black"
+    android:padding="16dp">
+
+    <!-- ===== Header ===== -->
+    <ImageView
+        android:id="@+id/ivTopLogo"
+        android:layout_width="22dp"
+        android:layout_height="22dp"
+        android:src="@drawable/splash"
+        android:tint="@android:color/white"
+        android:contentDescription="@string/app_name"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tvTopTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="오늘 공부했니?"
+        android:textColor="@android:color/white"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:layout_marginStart="8dp"
+        android:maxLines="1"
+        android:ellipsize="end"
+        app:layout_constraintStart_toEndOf="@id/ivTopLogo"
+        app:layout_constraintEnd_toStartOf="@id/tvPageLabel"
+        app:layout_constraintTop_toTopOf="@id/ivTopLogo"
+        app:layout_constraintBottom_toBottomOf="@id/ivTopLogo" />
+
+    <TextView
+        android:id="@+id/tvPageLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="RANKING"
+        android:textColor="@android:color/white"
+        android:textSize="12sp"
+        android:alpha="0.7"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/ivTopLogo"
+        app:layout_constraintBottom_toBottomOf="@id/ivTopLogo" />
+
+    <!-- ===== Main Card ===== -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardRanking"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="14dp"
+        app:cardCornerRadius="18dp"
+        app:cardUseCompatPadding="true"
+        app:cardBackgroundColor="@android:color/transparent"
+        app:strokeWidth="1dp"
+        app:strokeColor="#2A2A2A"
+        app:layout_constraintTop_toBottomOf="@id/ivTopLogo"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintWidth_max="560dp"
+        app:layout_constraintHorizontal_bias="0.5">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/bg_rank_purple"
+            android:padding="16dp">
+
+            <!-- 별(선택) -->
+            <LinearLayout
+                android:id="@+id/rowStars"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <ImageView android:layout_width="18dp" android:layout_height="18dp" android:src="@drawable/king" android:tint="#FFD54F"/>
+                <ImageView android:layout_width="18dp" android:layout_height="18dp" android:src="@drawable/king" android:tint="#FFD54F"/>
+                <ImageView android:layout_width="18dp" android:layout_height="18dp" android:src="@drawable/king" android:tint="#FFD54F"/>
+                <ImageView android:layout_width="18dp" android:layout_height="18dp" android:src="@drawable/king" android:tint="#FFD54F"/>
+                <ImageView android:layout_width="18dp" android:layout_height="18dp" android:src="@drawable/king" android:tint="#FFD54F"/>
+            </LinearLayout>
+
+
+            <!-- ✅ 제목(검정) -->
+            <TextView
+                android:id="@+id/tvRankTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="이 달의 공부왕"
+                android:textColor="#111111"
+                android:textStyle="bold"
+                android:textSize="22sp"
+                android:layout_marginTop="10dp"
+                app:layout_constraintTop_toBottomOf="@id/rowStars"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <!-- 서브(회색) -->
+            <TextView
+                android:id="@+id/tvRankSub"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="12월 랭킹"
+                android:textColor="#666666"
+                android:textSize="13sp"
+                android:layout_marginTop="4dp"
+                app:layout_constraintTop_toBottomOf="@id/tvRankTitle"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <!-- ✅ 탭(아이콘/인디케이터 검정) -->
+            <com.google.android.material.tabs.TabLayout
+                android:id="@+id/tabRanking"
+                android:layout_width="0dp"
+                android:layout_height="52dp"
+                android:layout_marginTop="12dp"
+                android:background="@android:color/transparent"
+                app:tabMode="fixed"
+                app:tabGravity="fill"
+                app:tabIndicatorColor="#111111"
+                app:tabIndicatorHeight="3dp"
+                app:tabIndicatorFullWidth="false"
+                app:tabRippleColor="@android:color/transparent"
+                app:tabIconTint="#111111"
+                app:layout_constraintTop_toBottomOf="@id/tvRankSub"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+
+            </com.google.android.material.tabs.TabLayout>
+
+            <View
+                android:id="@+id/divider"
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:background="#22000000"
+                app:layout_constraintTop_toBottomOf="@id/tabRanking"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <androidx.viewpager2.widget.ViewPager2
+                android:id="@+id/pagerRanking"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginTop="10dp"
+                app:layout_constraintTop_toBottomOf="@id/divider"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                tools:layout_height="400dp" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.google.android.material.card.MaterialCardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
