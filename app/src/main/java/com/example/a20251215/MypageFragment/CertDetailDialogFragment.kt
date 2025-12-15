@@ -12,10 +12,14 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
-import androidx.lifecycle.lifecycleScope
+import com.example.a20251215.Post.Post
+import com.example.a20251215.Post.PostListResponse
 import com.example.a20251215.R
-import kotlinx.coroutines.launch
+import com.example.a20251215.Retrofit.RetrofitClient
 import org.threeten.bp.LocalDate
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class CertDetailDialogFragment : DialogFragment() {
 
@@ -34,6 +38,10 @@ class CertDetailDialogFragment : DialogFragment() {
             }
         }
     }
+
+    // ✅ companion object 안에 두면 안됨 (인스턴스 공유로 꼬임)
+    private var call: Call<PostListResponse>? = null
+    private var currentPost: Post? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -73,32 +81,115 @@ class CertDetailDialogFragment : DialogFragment() {
         val btnEdit = view.findViewById<View>(R.id.btnEdit)
         val btnDelete = view.findViewById<View>(R.id.btnDelete)
 
-        // ✅ 내 글이 아니면 수정/삭제 숨김
-        layoutActions.isVisible = isOwner
-
         tvDate.text = dateStr
         tvContent.text = "불러오는 중..."
+        ivPhoto.setImageDrawable(null)
+
+        // ✅ 글 주인일 때만 "수정/삭제" 영역이 보일 수 있음 (글 없으면 아래에서 또 숨김)
+        layoutActions.isVisible = isOwner
 
         btnClose.setOnClickListener { dismissAllowingStateLoss() }
 
-        btnEdit.setOnClickListener { onEditClicked() }
-        btnDelete.setOnClickListener { onDeleteClicked() }
-
-        // ✅ 여기서 “해당 날짜 인증 게시글” 로드
-        viewLifecycleOwner.lifecycleScope.launch {
-            // TODO: 서버에서 targetUserId + dateStr 로 조회해서 바인딩
-            tvContent.text = "여기에 인증 글 내용..."
-            // Glide.with(ivPhoto).load(post.imageUrl).into(ivPhoto)
+        btnEdit.setOnClickListener {
+            if (!isOwner) return@setOnClickListener
+            val post = currentPost ?: return@setOnClickListener
+            // TODO: 수정 화면 이동 (post.postId 넘기기)
+            // startActivity(Intent(requireContext(), EditPostActivity::class.java).putExtra("post_id", post.postId))
+            dismissAllowingStateLoss()
         }
+
+        btnDelete.setOnClickListener {
+            if (!isOwner) return@setOnClickListener
+            val post = currentPost ?: return@setOnClickListener
+            // TODO: 삭제 confirm + delete_post.php 호출 (post.postId, myUserId)
+            dismissAllowingStateLoss()
+        }
+
+        // ✅ 서버에서 "해당 날짜 인증 게시글" 로드
+        loadPostOfDate(
+            targetUserId = targetUserId,
+            dateStr = dateStr,
+            isOwner = isOwner,
+            tvContent = tvContent,
+            ivPhoto = ivPhoto,
+            layoutActions = layoutActions
+        )
     }
 
-    private fun onEditClicked() {
-        // TODO: EditActivity 열기
-        dismissAllowingStateLoss()
+    private fun loadPostOfDate(
+        targetUserId: Int,
+        dateStr: String, // yyyy-MM-dd
+        isOwner: Boolean,
+        tvContent: TextView,
+        ivPhoto: ImageView,
+        layoutActions: LinearLayout
+    ) {
+        currentPost = null
+        tvContent.text = "불러오는 중..."
+        ivPhoto.setImageDrawable(null)
+
+        // ✅ 글 로드 전엔 숨겼다가, 성공+내글이면 보여주기 (버튼 사라진 원인 방지)
+        layoutActions.isVisible = false
+
+        call?.cancel()
+        call = RetrofitClient.apiService.getUserPosts(targetUserId)
+
+        call?.enqueue(object : Callback<PostListResponse> {
+            override fun onResponse(call: Call<PostListResponse>, response: Response<PostListResponse>) {
+                if (!isAdded) return
+
+                if (!response.isSuccessful) {
+                    tvContent.text = "불러오기 실패 (HTTP ${response.code()})"
+                    layoutActions.isVisible = false
+                    return
+                }
+
+                val body = response.body()
+                if (body == null || !body.success) {
+                    tvContent.text = body?.message ?: "불러오기 실패"
+                    layoutActions.isVisible = false
+                    return
+                }
+
+                val post = pickPostByDate(body.data, dateStr)
+                if (post == null) {
+                    tvContent.text = "이 날짜에 인증한 게시글이 없어요 🙂"
+                    layoutActions.isVisible = false
+                    return
+                }
+
+                currentPost = post
+                tvContent.text = post.content
+
+                // ✅ 이미지 로딩(원하면 Glide 추가해서 사용)
+                // if (!post.imageUrl.isNullOrBlank()) {
+                //     Glide.with(ivPhoto).load(post.imageUrl).into(ivPhoto)
+                // }
+
+                // ✅ 내 글 + 실제 글 있을 때만 수정/삭제 노출
+                layoutActions.isVisible = isOwner
+            }
+
+            override fun onFailure(call: Call<PostListResponse>, t: Throwable) {
+                if (!isAdded) return
+                tvContent.text = "네트워크 오류: ${t.message ?: "unknown"}"
+                layoutActions.isVisible = false
+            }
+        })
     }
 
-    private fun onDeleteClicked() {
-        // TODO: 삭제 confirm + 서버 삭제 호출
-        dismissAllowingStateLoss()
+    // created_at이 "YYYY-MM-DD HH:mm:ss" 형태라고 가정
+    private fun pickPostByDate(list: List<Post>, dateStr: String): Post? {
+        val filtered = list.filter { p ->
+            p.createdAt.take(10) == dateStr
+        }
+        return filtered.maxByOrNull { it.createdAt } // 같은 날짜 여러개면 최신 1개
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        call?.cancel()
+        call = null
+        currentPost = null
     }
 }
