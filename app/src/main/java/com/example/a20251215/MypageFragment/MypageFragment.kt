@@ -188,14 +188,14 @@ class MypageFragment : Fragment() {
     private fun setTopStats(monthCount: Int, streak: Int) {
         tvStat1.text = "이번 달 ${monthCount}회"
         tvStat2.text = "연속 ${streak}일"
-        tvStat3.text = "내 랭킹 ${rankLabel(monthCount)}"
+        tvStat3.text = "이번 달 : ${rankLabel(monthCount)}"
     }
 
     private fun rankLabel(monthCount: Int): String {
         return when {
-            monthCount <= 5 -> "WORST"
-            monthCount <= 10 -> "SOSO"
-            monthCount <= 20 -> "BEST"
+            monthCount <= 5 -> "노는중"
+            monthCount <= 10 -> "해보자"
+            monthCount <= 20 -> "열공중"
             else -> "LEGEND"
         }
     }

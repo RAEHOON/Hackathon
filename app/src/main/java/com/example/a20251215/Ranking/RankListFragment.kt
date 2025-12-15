@@ -9,6 +9,11 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.a20251215.R
+import com.example.a20251215.Retrofit.RetrofitClient
+import org.threeten.bp.YearMonth
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class RankListFragment : Fragment() {
 
@@ -16,9 +21,10 @@ class RankListFragment : Fragment() {
     private lateinit var tvEmpty: TextView
     private val adapter = RankListAdapter()
 
+    private var callRanking: Call<RankingResponse>? = null
+
     private val rankType: RankType by lazy {
-        val v = requireArguments().getString(ARG_TYPE, RankType.BEST.name)
-        RankType.valueOf(v)
+        RankType.valueOf(requireArguments().getString(ARG_TYPE, RankType.BEST.name))
     }
 
     override fun onCreateView(
@@ -36,36 +42,77 @@ class RankListFragment : Fragment() {
         rv.layoutManager = LinearLayoutManager(requireContext())
         rv.adapter = adapter
 
-        // ✅ 지금은 예시(더미). 나중에 서버 응답으로 raw만 바꿔 끼우면 됨.
-        val raw = loadDummyScores()
-
-        render(raw)
+        loadRanking()
     }
 
-    private fun render(raw: List<UserScore>) {
-        val items = buildRankItems(raw, rankType)
+    private fun loadRanking() {
+        // 로딩 표시
+        tvEmpty.visibility = View.VISIBLE
+        rv.visibility = View.GONE
+        tvEmpty.text = "불러오는 중..."
 
-        if (items.isEmpty()) {
-            // ✅ 아무도 인증 안 했을 때
-            tvEmpty.visibility = View.VISIBLE
-            rv.visibility = View.GONE
-        } else {
-            tvEmpty.visibility = View.GONE
-            rv.visibility = View.VISIBLE
-            adapter.submitList(items)
+        val monthParam = YearMonth.now().toString() // "2025-12"
+
+        callRanking?.cancel()
+        callRanking = when (rankType) {
+            RankType.BEST -> RetrofitClient.apiService.getBestRanking(monthParam)
+            RankType.WORST -> RetrofitClient.apiService.getWorstRanking(monthParam)
         }
+
+        callRanking?.enqueue(object : Callback<RankingResponse> {
+            override fun onResponse(call: Call<RankingResponse>, response: Response<RankingResponse>) {
+                if (!isAdded) return
+
+                val body = response.body()
+                if (!response.isSuccessful || body == null) {
+                    showMessage("불러오기 실패 (HTTP ${response.code()})")
+                    return
+                }
+                if (!body.success) {
+                    showMessage(body.message.ifBlank { "불러오기 실패" })
+                    return
+                }
+
+                // ✅ 서버 응답 -> UserScore로 변환
+                val rawScores: List<UserScore> = body.data.map {
+                    UserScore(
+                        userId = it.memberId,
+                        name = it.nickname,
+                        certCount = it.uploadCount
+                    )
+                }
+
+                // ✅ 동점/메달/빈상태 규칙 적용
+                val items = buildRankItems(rawScores, rankType)
+
+                if (items.isEmpty()) {
+                    // BEST는 certCount>0 필터 후 empty면 "아무도 인증 안함" 케이스
+                    // WORST는 서버가 empty로 주면 여기로 들어옴
+                    showMessage("이달의 공부왕을 도전해보세요!")
+                } else {
+                    tvEmpty.visibility = View.GONE
+                    rv.visibility = View.VISIBLE
+                    adapter.submitList(items)
+                }
+            }
+
+            override fun onFailure(call: Call<RankingResponse>, t: Throwable) {
+                if (!isAdded) return
+                showMessage("네트워크 오류: ${t.message ?: "unknown"}")
+            }
+        })
     }
 
-    // ✅ 테스트용 더미
-    private fun loadDummyScores(): List<UserScore> {
-        return listOf(
-            UserScore(1, "미리동걸음왕", 10),
-            UserScore(2, "튼튼한다리", 10),
-            UserScore(3, "조깅왕", 8),
-            UserScore(4, "타잔", 0),
-            UserScore(5, "스피드", 0),
-        )
-        // 전부 0으로 바꾸면 → "이달의 공부왕을 도전해보세요!" 만 뜸
+    private fun showMessage(msg: String) {
+        tvEmpty.visibility = View.VISIBLE
+        rv.visibility = View.GONE
+        tvEmpty.text = msg
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        callRanking?.cancel()
+        callRanking = null
     }
 
     companion object {
