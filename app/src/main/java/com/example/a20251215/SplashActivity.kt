@@ -1,5 +1,4 @@
-//package com.example.a20251215
-//
+package com.example.a20251215
 //import android.content.Intent
 //import android.os.Bundle
 //import androidx.appcompat.app.AppCompatActivity
