@@ -107,6 +107,7 @@ data class RankItem(
     val sub: String
 )
 
+
 /** ✅ RecyclerView 어댑터(간단 UI를 코드로 생성) */
 class RankListAdapter(
     private val items: List<RankItem>,
