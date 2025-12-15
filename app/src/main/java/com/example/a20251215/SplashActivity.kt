@@ -39,7 +39,6 @@ class SplashActivity : AppCompatActivity() {
             startActivity(nextIntent)
             finish()
         }
-
     }
 
     private fun applyBaseSystemUi() {
