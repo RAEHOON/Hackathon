@@ -5,8 +5,8 @@
     android:id="@+id/homeRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/black"
-    android:padding="20dp">
+    android:background="@android:color/black"
+    android:padding="16dp">
 
     <!-- ===== Header ===== -->
     <ImageView
@@ -14,7 +14,7 @@
         android:layout_width="22dp"
         android:layout_height="22dp"
         android:src="@drawable/splash"
-        app:tint="@android:color/white"
+        android:tint="@android:color/white"
         android:contentDescription="@string/app_name"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -39,7 +39,7 @@
         android:id="@+id/tvPageLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="home"
+        android:text="HOME"
         android:textStyle="bold"
         android:textColor="@android:color/white"
         android:textSize="12sp"
@@ -48,26 +48,30 @@
         app:layout_constraintTop_toTopOf="@id/ivTopLogo"
         app:layout_constraintBottom_toBottomOf="@id/ivTopLogo" />
 
-    <!-- ✅ 가운데 흰 카드 -->
+    <!-- ===== Main Card (Ranking 카드 크기/제약 그대로) ===== -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/cardHome"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="16dp"
-        app:cardBackgroundColor="@android:color/white"
+        android:layout_marginTop="14dp"
         app:cardCornerRadius="18dp"
         app:cardUseCompatPadding="true"
+        app:cardBackgroundColor="@android:color/transparent"
+        app:strokeWidth="1dp"
+        app:strokeColor="#2A2A2A"
         app:layout_constraintTop_toBottomOf="@id/ivTopLogo"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintWidth_max="520dp"
+        app:layout_constraintWidth_max="560dp"
         app:layout_constraintHorizontal_bias="0.5"
         tools:layout_height="620dp">
 
+        <!-- 카드 내부(실제 흰 배경 영역) -->
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:background="@drawable/bg_rank_white"
             android:padding="18dp">
 
             <!-- 제목 -->
@@ -84,7 +88,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <!-- ✅ 날짜 바(좌우 스크롤용 RecyclerView) -->
+            <!-- 날짜 바 -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardDates"
                 android:layout_width="0dp"
@@ -109,11 +113,11 @@
                     android:overScrollMode="never"
                     tools:itemCount="9"
                     tools:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                    tools:listitem="@layout/fragment_home_date"
-                    tools:orientation="horizontal" />
+                    tools:orientation="horizontal"
+                    tools:listitem="@layout/fragment_home_date" />
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- ✅ 인증자 목록 박스(검정) -->
+            <!-- 인증자 목록 박스 -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardCertList"
                 android:layout_width="0dp"
@@ -121,10 +125,10 @@
                 android:layout_marginTop="14dp"
                 app:cardBackgroundColor="#3B3B3B"
                 app:cardCornerRadius="14dp"
+                app:layout_constraintTop_toBottomOf="@id/cardDates"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/cardDates">
+                app:layout_constraintEnd_toEndOf="parent">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
@@ -140,11 +144,11 @@
                         android:textColor="@android:color/white"
                         android:textSize="20sp"
                         android:textStyle="bold"
-                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        app:layout_constraintEnd_toEndOf="parent" />
 
-                    <!-- ✅ 인증자 리스트 (과거/오늘일 때 보이게) -->
+                    <!-- 인증자 리스트 -->
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/rvCertUsers"
                         android:layout_width="0dp"
@@ -154,15 +158,15 @@
                         android:paddingBottom="72dp"
                         android:scrollbars="none"
                         android:overScrollMode="never"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@id/tvSectionTitle"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
                         tools:itemCount="6"
                         tools:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                         tools:listitem="@layout/fragment_home_item_user" />
 
-                    <!-- ✅ 미래 날짜일 때: “내일 인증해주세요” -->
+                    <!-- 미래 날짜일 때 -->
                     <TextView
                         android:id="@+id/tvEmptyState"
                         android:layout_width="0dp"
@@ -173,13 +177,13 @@
                         android:textSize="16sp"
                         android:textStyle="bold"
                         android:visibility="gone"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@id/tvSectionTitle"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
                         tools:visibility="visible" />
 
-                    <!-- ✅ + 버튼(오늘만 보이게: 기본 visible, 코드에서 날짜 바뀌면 GONE) -->
+                    <!-- + 버튼 (오늘만 보이게: 코드에서 제어) -->
                     <com.google.android.material.floatingactionbutton.FloatingActionButton
                         android:id="@+id/fabAddCert"
                         android:layout_width="wrap_content"
@@ -187,10 +191,10 @@
                         android:layout_margin="14dp"
                         android:contentDescription="인증 추가"
                         app:backgroundTint="@android:color/white"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
                         app:srcCompat="@android:drawable/ic_input_add"
-                        app:tint="#111111" />
+                        app:tint="#111111"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent" />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.card.MaterialCardView>

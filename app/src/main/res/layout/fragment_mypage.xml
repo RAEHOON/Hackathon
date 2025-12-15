@@ -13,7 +13,6 @@
         android:layout_height="wrap_content"
         android:padding="16dp">
 
-        <!-- ===== Header ===== -->
         <ImageView
             android:id="@+id/ivTopLogo"
             android:layout_width="22dp"
@@ -53,7 +52,6 @@
             app:layout_constraintTop_toTopOf="@id/ivTopLogo"
             app:layout_constraintBottom_toBottomOf="@id/ivTopLogo" />
 
-        <!-- ===== Profile Card ===== -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardProfile"
             android:layout_width="0dp"
@@ -108,7 +106,6 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- ===== Stats Card (Guideline로 3등분 = 기종 달라도 안정) ===== -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardStats"
             android:layout_width="0dp"
@@ -215,7 +212,6 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- ===== Calendar Card ===== -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardCalendar"
             android:layout_width="0dp"
@@ -252,7 +248,7 @@
                     android:id="@+id/tvCalendarHint"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="날짜를 누르면 그날의 인증글이 떠요"
+                    android:text="날짜를 누르면 그날의 인증글이 떠요👆🏻"
                     android:textSize="12sp"
                     android:textColor="@android:color/white"
                     android:alpha="0.7"
