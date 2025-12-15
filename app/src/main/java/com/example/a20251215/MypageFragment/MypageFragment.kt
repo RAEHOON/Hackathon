@@ -7,7 +7,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.example.a20251215.R
@@ -24,8 +23,16 @@ class MypageFragment : Fragment() {
 
     companion object {
         private const val TAG = "MYPAGE"
+
         private const val PREF_NAME = "UserInfo"
         private const val KEY_NICKNAME = "nickname"
+
+         private const val KEY_USER_ID_1 = "user_id"
+        private const val KEY_USER_ID_2 = "id"
+
+         private const val ARG_TARGET_USER_ID = "targetUserId"
+
+        private const val DIALOG_TAG = "cert_detail"
     }
 
     private var quoteJob: Job? = null
@@ -68,12 +75,18 @@ class MypageFragment : Fragment() {
 
         Log.d(TAG, "onViewCreated() called")
 
+         val myUserId = loadMyUserIdFromPrefs()
+        val targetUserId = arguments?.getInt(ARG_TARGET_USER_ID, myUserId) ?: myUserId
+        Log.d(TAG, "myUserId=$myUserId targetUserId=$targetUserId")
+
+        // 닉네임
         val nick = loadNicknameFromPrefs()
         tvNickname.text = nick
         Log.d(TAG, "tvNickname set to '$nick'")
 
         startQuoteTicker_5sec()
 
+        // 공휴일/일요일 데코
         val nowLocal: LocalDate = calendarView.currentDate.date
         loadAndDecorateMonth(nowLocal.year, nowLocal.monthValue)
 
@@ -82,14 +95,18 @@ class MypageFragment : Fragment() {
             loadAndDecorateMonth(local.year, local.monthValue)
         }
 
-        calendarView.setOnDateChangedListener { _, day, _ ->
+         calendarView.setOnDateChangedListener { _, day, _ ->
             val local: LocalDate = day.date
-            Toast.makeText(
-                requireContext(),
-                "${local.year}-${local.monthValue}-${local.dayOfMonth}",
-                Toast.LENGTH_SHORT
-            ).show()
+            showCertDialog(targetUserId, myUserId, local)
         }
+    }
+
+    private fun showCertDialog(targetUserId: Int, myUserId: Int, date: LocalDate) {
+         if (parentFragmentManager.findFragmentByTag(DIALOG_TAG) != null) return
+
+        CertDetailDialogFragment
+            .newInstance(targetUserId = targetUserId, myUserId = myUserId, date = date)
+            .show(parentFragmentManager, DIALOG_TAG)
     }
 
     private fun loadNicknameFromPrefs(): String {
@@ -100,6 +117,26 @@ class MypageFragment : Fragment() {
         Log.d(TAG, "prefs all = ${prefs.all}")
 
         return nick ?: "닉네임"
+    }
+
+    private fun loadMyUserIdFromPrefs(): Int {
+        val prefs = requireContext().getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+
+        val id1 = prefs.getInt(KEY_USER_ID_1, -1)
+        if (id1 != -1) return id1
+
+        val id2 = prefs.getInt(KEY_USER_ID_2, -1)
+        if (id2 != -1) return id2
+
+        // 혹시 String으로 저장했을 가능성까지 안전하게 처리
+        val s1 = prefs.getString(KEY_USER_ID_1, null)?.toIntOrNull()
+        if (s1 != null) return s1
+
+        val s2 = prefs.getString(KEY_USER_ID_2, null)?.toIntOrNull()
+        if (s2 != null) return s2
+
+        Log.w(TAG, "loadMyUserIdFromPrefs: user id not found. return -1")
+        return -1
     }
 
     private fun startQuoteTicker_5sec() {
@@ -190,8 +227,7 @@ class MypageFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-
-         if (!::tvNickname.isInitialized) return
+        if (!::tvNickname.isInitialized) return
 
         val nick = loadNicknameFromPrefs()
         tvNickname.text = nick
