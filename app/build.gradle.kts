@@ -40,6 +40,8 @@ android {
 dependencies {
 
     implementation("androidx.core:core-splashscreen:1.0.1")
+    implementation("com.prolificinteractive:material-calendarview:2.0.1")
+
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
