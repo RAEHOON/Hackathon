@@ -19,4 +19,19 @@ interface ApiService {
     ): Call<SignupResponse>
 
 
+    @FormUrlEncoded
+    @POST("send_code.php")
+    fun sendEmailCode(
+        @Field("email") email: String
+    ): Call<ApiResponse>
+
+    @FormUrlEncoded
+    @POST("check_code.php")
+    fun checkEmailCode(
+        @Field("email") email: String,
+        @Field("code") code: String
+    ): Call<ApiResponse>
+
+
+
 }
