@@ -8,23 +8,24 @@ import android.widget.Button
 import androidx.fragment.app.Fragment
 import com.example.a20251215.R
 
-class SignupEmailFragment : Fragment() {
+class SignupNicknameFragment : Fragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_signup_email, container, false)
+        return inflater.inflate(R.layout.fragment_signup_nickname, container, false)
     }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val confirmBtn = view.findViewById<Button>(R.id.btn_find_id_request)
+        val nextBtn = view.findViewById<Button>(R.id.btn_nickname_next)
 
-        confirmBtn.setOnClickListener {
+        nextBtn.setOnClickListener {
             parentFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, SignupNicknameFragment())
+                .replace(R.id.fragment_container, SignupPasswordFragment())
                 .addToBackStack(null)
                 .commit()
         }
