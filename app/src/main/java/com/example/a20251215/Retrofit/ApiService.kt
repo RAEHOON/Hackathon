@@ -1,5 +1,6 @@
 package com.example.a20251215.Retrofit
 
+import com.example.a20251215.LoginResponse
 import com.example.a20251215.Retrofit.ApiResponse
 import com.example.a20251215.Sign.SignupResponse
 import retrofit2.Call
@@ -19,7 +20,6 @@ interface ApiService {
         @Field("password") password: String
     ): Call<SignupResponse>
 
-
     @FormUrlEncoded
     @POST("send_code.php")
     fun sendEmailCode(
@@ -32,6 +32,13 @@ interface ApiService {
         @Field("email") email: String,
         @Field("code") code: String
     ): Call<ApiResponse>
+
+    @FormUrlEncoded
+    @POST("login.php")
+    fun login(
+        @Field("loginid") loginid: String,
+        @Field("password") password: String
+    ): Call<LoginResponse>
 
 
 
