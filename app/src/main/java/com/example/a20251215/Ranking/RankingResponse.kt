@@ -8,6 +8,7 @@ data class RankingResponse(
     @SerializedName("data") val data: List<RankingItem>
 )
 
+
 data class RankingItem(
     @SerializedName("member_id") val memberId: Int,
     @SerializedName("nickname") val nickname: String,
