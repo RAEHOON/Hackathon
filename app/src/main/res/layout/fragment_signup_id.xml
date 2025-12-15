@@ -30,10 +30,10 @@
     </Toolbar>
 
     <EditText
-        android:id="@+id/et_find_email"
+        android:id="@+id/et_username"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="이메일을 입력하세요."
+        android:hint="이름을 입력하세요."
         android:layout_marginTop="20dp"
         android:layout_marginHorizontal="30dp"
         android:textColor="@color/main_white"
@@ -43,10 +43,10 @@
         android:layout_marginBottom="10dp" />
 
     <Button
-        android:id="@+id/btn_find_id_request"
+        android:id="@+id/btn_check_username"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:text="인증번호 요청"
+        android:text="확인"
         android:layout_marginHorizontal="30dp"
         android:textColor="@color/main_black"
         android:backgroundTint="@color/main_white" />
@@ -59,35 +59,27 @@
         android:visibility="gone">
 
         <EditText
-            android:id="@+id/et_find_id_code"
+            android:id="@+id/et_user_id"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="인증번호 입력"
+            android:hint="아이디를 입력하세요."
             android:layout_marginTop="20dp"
             android:layout_marginHorizontal="30dp"
             android:textColor="@color/main_white"
             android:textColorHint="@color/main_white"
-            android:inputType="number"
+            android:inputType="text"
             android:backgroundTint="#FFFFFF"
             android:layout_marginBottom="12dp" />
 
-        <TextView
-            android:id="@+id/tv_find_id_timer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="03:00"
-            android:textColor="#FF6666"
-            android:textSize="14sp"
-            android:layout_marginBottom="20dp" />
-
         <Button
-            android:id="@+id/btn_find_id_confirm"
+            android:id="@+id/btn_user_id"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:text="인증 확인"
+            android:text="확인"
             android:layout_marginHorizontal="30dp"
             android:textColor="@color/main_black"
             android:backgroundTint="@color/main_white" />
     </LinearLayout>
+
 
 </LinearLayout>
