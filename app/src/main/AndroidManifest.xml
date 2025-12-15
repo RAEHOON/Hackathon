@@ -51,6 +51,8 @@
         <activity
             android:name=".SignUpActivity"
             android:exported="false" />
+        <activity android:name=".Post.WritePostActivity"
+            android:exported="false"/>
         <activity
             android:name=".MainActivity"
             android:exported="false" />
