@@ -24,9 +24,19 @@ class SplashActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             delay(3000)
-            startActivity(Intent(this@SplashActivity, LoginActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            })
+
+            val sharedPref = getSharedPreferences("UserInfo", MODE_PRIVATE)
+            val memberId = sharedPref.getInt("member_id", -1)
+            val loginId = sharedPref.getString("login_id", null)
+
+            val nextIntent = if (memberId != -1 && !loginId.isNullOrEmpty()) {
+                Intent(this@SplashActivity, MainActivity::class.java)
+            } else {
+                Intent(this@SplashActivity, LoginActivity::class.java)
+            }
+
+            nextIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(nextIntent)
             finish()
         }
     }

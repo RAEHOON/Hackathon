@@ -6,6 +6,7 @@ import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import com.example.a20251215.MypageFragment.MypageFragment
 import com.example.a20251215.Ranking.RankingFragment
+import com.example.a20251215.Setting.SettingsFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 
