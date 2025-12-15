@@ -11,6 +11,7 @@ data class HolidayItem(
 
 object HolidayXmlParser {
 
+
     fun parse(xml: String): List<HolidayItem> {
         val list = mutableListOf<HolidayItem>()
 

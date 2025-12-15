@@ -6,6 +6,7 @@ import retrofit2.http.Query
 
 interface KasiSpcdeApi {
 
+
     // 공휴일 정보 조회
     @GET("B090041/openapi/service/SpcdeInfoService/getRestDeInfo")
     suspend fun getRestDeInfo(

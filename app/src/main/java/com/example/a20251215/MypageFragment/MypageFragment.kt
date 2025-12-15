@@ -10,10 +10,10 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.example.a20251215.R
-import com.example.a20251215.holiday.HolidayDecorator
+//import com.example.a20251215.holiday.HolidayDecorator
 //import com.example.a20251215.holiday.HolidayXmlParser
 import com.example.a20251215.holiday.KasiRetrofit
-import com.example.a20251215.holiday.SundayDecorator
+//import com.example.a20251215.holiday.SundayDecorator
 import com.prolificinteractive.materialcalendarview.CalendarDay
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView
 import kotlinx.coroutines.Job
@@ -23,6 +23,7 @@ import kotlinx.coroutines.launch
 import org.threeten.bp.LocalDate
 
 class MypageFragment : Fragment() {
+    
 
     private var quoteJob: Job? = null
 
@@ -173,8 +174,7 @@ class MypageFragment : Fragment() {
     private fun applyDecorators(year: Int, month1to12: Int, holidays: Set<CalendarDay>) {
         calendarView.removeDecorators()
 
-        // ✅ 일요일 표시
-        calendarView.addDecorator(SundayDecorator(year, month1to12))
+        calendarView.addDecorator(SundayDecorator())
 
         // ✅ 공휴일 표시
         if (holidays.isNotEmpty()) {

@@ -6,6 +6,7 @@ import retrofit2.converter.scalars.ScalarsConverterFactory
 
 object KasiRetrofit {
 
+
     private val client = OkHttpClient.Builder().build()
 
     val api: KasiSpcdeApi by lazy {

@@ -1,4 +1,4 @@
-package com.example.a20251215.holiday
+package com.example.a20251215.MypageFragment
 
 import android.graphics.Color
 import android.graphics.Typeface
@@ -7,42 +7,31 @@ import android.text.style.StyleSpan
 import com.prolificinteractive.materialcalendarview.CalendarDay
 import com.prolificinteractive.materialcalendarview.DayViewDecorator
 import com.prolificinteractive.materialcalendarview.DayViewFacade
-import java.util.Calendar
+import org.threeten.bp.DayOfWeek
 
-class SundayDecorator(year: Int, month1to12: Int) : DayViewDecorator {
-    private val sundays: Set<CalendarDay> = buildSundays(year, month1to12)
+/** ✅ 일요일: 무조건 빨강 */
 
-    override fun shouldDecorate(day: CalendarDay): Boolean = sundays.contains(day)
+class SundayDecorator : DayViewDecorator {
+    override fun shouldDecorate(day: CalendarDay): Boolean {
+        return day.date.dayOfWeek == DayOfWeek.SUNDAY
+    }
 
     override fun decorate(view: DayViewFacade) {
         view.addSpan(ForegroundColorSpan(Color.RED))
-        view.addSpan(StyleSpan(Typeface.BOLD))
-    }
-
-    private fun buildSundays(year: Int, month1to12: Int): Set<CalendarDay> {
-        val cal = Calendar.getInstance()
-        cal.set(year, month1to12 - 1, 1)
-
-        val max = cal.getActualMaximum(Calendar.DAY_OF_MONTH)
-        val set = HashSet<CalendarDay>(max)
-
-        for (d in 1..max) {
-            cal.set(year, month1to12 - 1, d)
-            if (cal.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
-//                set.add(CalendarDay.from(cal))
-            }
-        }
-        return set
     }
 }
 
-class HolidayDecorator(holidays: Set<CalendarDay>) : DayViewDecorator {
-    private val holidaySet = holidays
+/** ✅ 공휴일: 빨강(+굵게는 옵션) */
+class HolidayDecorator(
+    private val holidays: Set<CalendarDay>
+) : DayViewDecorator {
 
-    override fun shouldDecorate(day: CalendarDay): Boolean = holidaySet.contains(day)
+    override fun shouldDecorate(day: CalendarDay): Boolean {
+        return holidays.contains(day)
+    }
 
     override fun decorate(view: DayViewFacade) {
         view.addSpan(ForegroundColorSpan(Color.RED))
-        view.addSpan(StyleSpan(Typeface.BOLD))
+        view.addSpan(StyleSpan(Typeface.BOLD)) // 원하면 삭제 가능
     }
 }
