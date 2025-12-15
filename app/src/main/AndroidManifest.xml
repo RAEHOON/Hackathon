@@ -18,7 +18,7 @@
             android:name=".WithdrawActivity"
             android:exported="false" />
         <activity
-            android:name=".PasswordResetActivity"
+            android:name=".Setting.PasswordResetActivity"
             android:exported="false" />
         <activity
             android:name=".NicknameEditActivity"
@@ -37,7 +37,7 @@
             android:name=".LoginActivity"
             android:exported="true" />
         <activity
-            android:name=".EditProfileActivity"
+            android:name=".Setting.EditProfileActivity"
             android:exported="false" />
         <activity
             android:name=".OtherPageActivity"
