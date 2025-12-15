@@ -7,9 +7,6 @@
     android:layout_height="match_parent"
     android:background="@drawable/bg_splash"
     android:padding="24dp">
-
-    <!-- 로고 -->
-
     <!-- 앱 이름 -->
 
     <ImageView
