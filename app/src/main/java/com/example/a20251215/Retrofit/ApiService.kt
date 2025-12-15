@@ -7,12 +7,16 @@ import com.example.a20251215.Post.PostListResponse
 import com.example.a20251215.Ranking.RankingResponse
 import com.example.a20251215.Retrofit.ApiResponse
 import com.example.a20251215.Sign.SignupResponse
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 
 import retrofit2.Call
 
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
+import retrofit2.http.Multipart
 import retrofit2.http.POST
+import retrofit2.http.Part
 
 interface ApiService {
 
@@ -47,25 +51,26 @@ interface ApiService {
     ): Call<LoginResponse>
 
 
-    @FormUrlEncoded
+    @Multipart
     @POST("upload_post.php")
     fun uploadPost(
-        @Field("member_id") memberId: Int,
-        @Field("title") title: String,
-        @Field("content") content: String,
-        @Field("image_url") imageUrl: String
+        @Part("member_id") memberId: RequestBody,
+        @Part("title") title: RequestBody,
+        @Part("content") content: RequestBody,
+        @Part image: MultipartBody.Part?
     ): Call<ApiResponse>
 
 
-    @FormUrlEncoded
+    @Multipart
     @POST("update_post.php")
     fun updatePost(
-        @Field("post_id") postId: Int,
-        @Field("member_id") memberId: Int,
-        @Field("title") title: String,
-        @Field("content") content: String,
-        @Field("image_url") imageUrl: String
+        @Part("post_id") postId: RequestBody,
+        @Part("member_id") memberId: RequestBody,
+        @Part("title") title: RequestBody,
+        @Part("content") content: RequestBody,
+        @Part image: MultipartBody.Part? = null
     ): Call<ApiResponse>
+
 
 
     @FormUrlEncoded
