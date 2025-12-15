@@ -14,4 +14,5 @@
         <item name="windowSplashScreenAnimatedIcon">@drawable/splash</item>
         <item name="postSplashScreenTheme">@style/Theme._20251215</item>
     </style>
+
 </resources>
