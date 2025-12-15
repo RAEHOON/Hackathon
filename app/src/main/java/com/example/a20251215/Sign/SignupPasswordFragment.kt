@@ -23,7 +23,6 @@ class SignupPasswordFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val finishbtn = view.findViewById<Button>(R.id.btn_signup_finish)
-
         finishbtn.setOnClickListener {
             Toast.makeText(context, "회원가입 완료", Toast.LENGTH_SHORT).show()
 
