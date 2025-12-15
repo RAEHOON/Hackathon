@@ -9,11 +9,13 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.Toast
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import com.example.a20251215.R
 import com.example.a20251215.Retrofit.ApiResponse
 import com.example.a20251215.Retrofit.RetrofitClient
 import com.example.a20251215.ValidationUtils
+import com.google.android.material.textfield.TextInputLayout
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -24,6 +26,9 @@ class SignupUserIdFragment: Fragment() {
     private lateinit var userIdEt: EditText
 
     private var receivedEmail: String = ""
+
+    private lateinit var tilUsername: TextInputLayout
+    private lateinit var tilUserId: TextInputLayout
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -38,18 +43,28 @@ class SignupUserIdFragment: Fragment() {
 
         receivedEmail = arguments?.getString("email") ?: ""
 
+        tilUsername = view.findViewById(R.id.til_username)
         usernameEt = view.findViewById(R.id.et_username)
         val checknameBtn = view.findViewById<Button>(R.id.btn_check_username)
 
+        tilUserId = view.findViewById(R.id.til_user_id)
         val layoutIdAuth = view.findViewById<LinearLayout>(R.id.layout_find_id_auth)
         userIdEt = view.findViewById(R.id.et_user_id)
         val checkIdBtn = view.findViewById<Button>(R.id.btn_user_id)
+
+        usernameEt.addTextChangedListener {
+            tilUsername.error = null
+        }
+
+        userIdEt.addTextChangedListener {
+            tilUserId.error = null
+        }
 
         checknameBtn.setOnClickListener {
             val name = usernameEt.text.toString().trim()
 
             if (name.isEmpty()) {
-                Toast.makeText(context, "이름을 입력해주세요.", Toast.LENGTH_SHORT).show()
+                tilUsername.error = "이름을 입력해주세요."
                 return@setOnClickListener
             }
 
@@ -66,7 +81,7 @@ class SignupUserIdFragment: Fragment() {
             val inputId = userIdEt.text.toString().trim()
 
             if (!ValidationUtils.ID_PATTERN.matcher(inputId).matches()) {
-                Toast.makeText(context, "아이디는 영문+숫자 4자 이상이어야 합니다.", Toast.LENGTH_SHORT).show()
+                tilUserId.error = "아이디는 영문+숫자 4자 이상이어야 합니다."
                 return@setOnClickListener
             }
 
@@ -84,11 +99,13 @@ class SignupUserIdFragment: Fragment() {
                 if (response.isSuccessful && response.body()?.success == true) {
                     Toast.makeText(context, "사용 가능한 아이디입니다.", Toast.LENGTH_SHORT).show()
 
+                    tilUserId.error = null
+
                     val currentName = usernameEt.text.toString().trim()
                     goToPasswordFragment(currentName, id, receivedEmail)
                 } else {
                     val msg = response.body()?.message ?: "이미 사용 중인 아이디입니다."
-                    Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                    tilUserId.error = msg
                 }
             }
 
