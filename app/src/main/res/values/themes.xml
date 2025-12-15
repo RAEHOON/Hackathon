@@ -8,11 +8,8 @@
     <!-- Main App Theme -->
     <style name="Theme._20251215" parent="Base.Theme._20251215" />
 
-    <!-- 스플래시 전용 테마  -->
-    <style name="Theme.A20251215.Splash" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">#FFFFFF</item>
-        <item name="windowSplashScreenAnimatedIcon">@drawable/splash</item>
-        <item name="postSplashScreenTheme">@style/Theme._20251215</item>
+    <style name="Theme.Splash" parent="Theme._20251215" >
+        <item name="android:windowIsTranslucent">true</item> // true => 투명처리
     </style>
 
 </resources>

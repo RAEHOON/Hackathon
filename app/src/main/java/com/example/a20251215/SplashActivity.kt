@@ -1,7 +1,9 @@
 package com.example.a20251215
-
 import android.content.Intent
+import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
@@ -11,12 +13,13 @@ import kotlinx.coroutines.launch
 class SplashActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        // ✅ OS 스플래시는 잠깐만 쓰고(자동으로 바로 내려감)
+
         installSplashScreen()
 
         super.onCreate(savedInstanceState)
 
-        // ✅ 여기서 “내가 만든 2번 레이아웃”을 실제로 띄움
+        applyBaseSystemUi()
+
         setContentView(R.layout.activity_splash)
 
         lifecycleScope.launch {
@@ -26,5 +29,47 @@ class SplashActivity : AppCompatActivity() {
             })
             finish()
         }
+    }
+
+    private fun applyBaseSystemUi() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            window.statusBarColor = Color.TRANSPARENT
+
+            @Suppress("DEPRECATION")
+            window.decorView.systemUiVisibility =
+                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
+                        View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
+                        View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR or
+                        View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
+                        View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
+                        View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+        }
+    }
+
+    fun setStatusBarIconDark(isDark: Boolean) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val decor = window.decorView
+
+            @Suppress("DEPRECATION")
+            var flags =
+                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
+                        View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+
+            if (isDark) {
+                @Suppress("DEPRECATION")
+                flags = flags or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+            }
+
+            @Suppress("DEPRECATION")
+            decor.systemUiVisibility = flags
+        }
+    }
+
+    fun applyFullScreen() {
+        @Suppress("DEPRECATION")
+        window.decorView.systemUiVisibility =
+            View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
+                    View.SYSTEM_UI_FLAG_FULLSCREEN or
+                    View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
     }
 }
