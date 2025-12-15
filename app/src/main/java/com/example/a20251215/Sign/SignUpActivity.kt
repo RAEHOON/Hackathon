@@ -1,8 +1,9 @@
 package com.example.a20251215
 
 import android.os.Bundle
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import com.example.a20251215.Sign.SignupEmailFragment
+import com.example.a20251215.R
 
 class SignUpActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
