@@ -9,10 +9,16 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.example.a20251215.LoginActivity
 import com.example.a20251215.R
+import com.example.a20251215.Retrofit.ApiResponse
+import com.example.a20251215.Retrofit.RetrofitClient
 import com.example.a20251215.WithdrawActivity
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class SettingsFragment : Fragment() {
 
@@ -87,12 +93,56 @@ class SettingsFragment : Fragment() {
 
             dialog.show()
         }
-
         // 회원탈퇴
         view.findViewById<TextView>(R.id.itemWithdraw).setOnClickListener {
-            val intent = Intent(requireContext(), WithdrawActivity::class.java)
-            intent.putExtra("member_id", memberId)
-            startActivity(intent)
+            val dialogView = LayoutInflater.from(requireContext())
+                .inflate(R.layout.custom_logout_dialog, null)
+
+            val dialog = AlertDialog.Builder(requireContext(), R.style.CustomAlertDialog)
+                .setView(dialogView)
+                .create()
+
+            dialogView.findViewById<TextView>(R.id.tvDialogTitle)?.text = "회원탈퇴"
+            dialogView.findViewById<TextView>(R.id.tvDialogMessage)?.text = "정말 탈퇴하시겠습니까?"
+
+            val btnConfirm = dialogView.findViewById<Button>(R.id.btnPositive)
+            val btnCancel = dialogView.findViewById<Button>(R.id.btnNegative)
+
+            btnConfirm.setOnClickListener {
+                RetrofitClient.apiService.deleteAccount(memberId)
+                    .enqueue(object : retrofit2.Callback<ApiResponse> {
+                        override fun onResponse(
+                            call: retrofit2.Call<ApiResponse>,
+                            response: retrofit2.Response<ApiResponse>
+                        ) {
+                            if (response.isSuccessful && response.body()?.success == true) {
+                                sharedPref.edit().clear().apply()
+                                val intent = Intent(requireContext(), LoginActivity::class.java)
+                                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                startActivity(intent)
+                                dialog.dismiss()
+                            } else {
+                                Toast.makeText(requireContext(), response.body()?.message ?: "회원 탈퇴 실패", Toast.LENGTH_SHORT).show()
+                                dialog.dismiss()
+                            }
+                        }
+
+                        override fun onFailure(call: retrofit2.Call<ApiResponse>, t: Throwable) {
+                            Toast.makeText(requireContext(), "서버 오류: ${t.localizedMessage}", Toast.LENGTH_SHORT).show()
+                            dialog.dismiss()
+                        }
+                    })
+            }
+
+            btnCancel.setOnClickListener {
+                dialog.dismiss()
+            }
+
+            dialog.show()
         }
+
+
+
+
     }
 }

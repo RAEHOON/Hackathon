@@ -132,9 +132,9 @@ interface ApiService {
     @FormUrlEncoded
     @POST("delete_account.php")
     fun deleteAccount(
-        @Field("member_id") memberId: Int,
-        @Field("password") password: String
+        @Field("member_id") memberId: Int
     ): Call<ApiResponse>
+
 
     @FormUrlEncoded
     @POST("find_id.php")
