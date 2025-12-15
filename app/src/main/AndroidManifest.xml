@@ -21,9 +21,6 @@
             android:name=".Setting.PasswordResetActivity"
             android:exported="false" />
         <activity
-            android:name=".NicknameEditActivity"
-            android:exported="false" />
-        <activity
             android:name=".SplashActivity"
             android:exported="true"
             android:theme="@style/Theme.Splash">

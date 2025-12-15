@@ -1,93 +1,146 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
-    android:gravity="center_horizontal"
     android:background="@color/main_black">
 
-    <Toolbar
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:background="@android:color/transparent"
-        android:elevation="4dp">
-
-        <ImageView
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:contentDescription="뒤로가기"
-            android:src="@drawable/back_btn" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:text="회원가입"
-            android:textColor="@color/main_white"
-            android:textSize="20dp" />
-    </Toolbar>
-
-    <EditText
-        android:id="@+id/et_find_email"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="이메일을 입력하세요."
-        android:layout_marginTop="20dp"
-        android:layout_marginHorizontal="30dp"
-        android:textColor="@color/main_white"
-        android:textColorHint="@color/main_white"
-        android:inputType="textEmailAddress"
-        android:backgroundTint="#FFFFFF"
-        android:layout_marginBottom="10dp" />
-
-    <Button
-        android:id="@+id/btn_find_id_request"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:text="인증번호 요청"
-        android:layout_marginHorizontal="30dp"
-        android:textColor="@color/main_black"
-        android:backgroundTint="@color/main_white" />
-
     <LinearLayout
-        android:id="@+id/layout_find_id_auth"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:orientation="vertical"
-        android:visibility="gone">
+        android:gravity="center_horizontal">
 
-        <EditText
-            android:id="@+id/et_find_id_code"
+        <Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="@android:color/transparent"
+            android:elevation="4dp">
+
+            <ImageView
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:contentDescription="뒤로가기"
+                android:src="@drawable/back_btn" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="회원가입"
+                android:textColor="@color/main_white"
+                android:textSize="20dp" />
+        </Toolbar>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/til_email"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="인증번호 입력"
-            android:layout_marginTop="20dp"
             android:layout_marginHorizontal="30dp"
-            android:textColor="@color/main_white"
-            android:textColorHint="@color/main_white"
-            android:inputType="number"
-            android:backgroundTint="#FFFFFF"
-            android:layout_marginBottom="12dp" />
+            android:layout_marginTop="20dp"
+            app:errorEnabled="true">
 
-        <TextView
-            android:id="@+id/tv_find_id_timer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="03:00"
-            android:textColor="#FF6666"
-            android:textSize="14sp"
-            android:layout_marginBottom="20dp" />
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_find_email"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="이메일을 입력하세요"
+                android:inputType="textEmailAddress"
+                android:background="@drawable/login_round_white_box"
+                android:backgroundTint="#FFFFFF"
+                android:textColor="@color/main_white" />
+        </com.google.android.material.textfield.TextInputLayout>
 
         <Button
-            android:id="@+id/btn_find_id_confirm"
+            android:id="@+id/btn_find_id_request"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:text="인증 확인"
+            android:text="인증번호 요청"
             android:layout_marginHorizontal="30dp"
             android:textColor="@color/main_black"
             android:backgroundTint="@color/main_white" />
+
+        <LinearLayout
+            android:id="@+id/layout_find_id_auth"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:layout_marginHorizontal="30dp">
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/til_auth_code"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:errorEnabled="true">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/et_find_id_code"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="인증번호 입력"
+                        android:inputType="number"
+                        android:maxLength="6"
+                        android:background="@drawable/login_round_white_box"
+                        android:backgroundTint="#FFFFFF"
+                        android:textColor="@color/main_white"
+                        android:paddingEnd="60dp" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <TextView
+                    android:id="@+id/tv_find_id_timer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="03:00"
+                    android:textColor="#FF6666"
+                    android:textSize="14sp"
+                    android:layout_gravity="end|center_vertical"
+                    android:layout_marginEnd="15dp"
+                    android:layout_marginBottom="12dp"
+                    android:elevation="10dp"/>
+            </FrameLayout>
+            <Button
+                android:id="@+id/btn_find_id_confirm"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="인증 확인"
+                android:layout_marginHorizontal="30dp"
+                android:layout_marginTop="10dp"
+                android:textColor="@color/main_black"
+                android:backgroundTint="@color/main_white" />
+        </LinearLayout>
     </LinearLayout>
 
-</LinearLayout>
+    <LinearLayout
+        android:id="@+id/layout_loading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:background="@drawable/login_round_white_box"
+        android:padding="20dp"
+        android:backgroundTint="#CC000000"
+        android:visibility="gone">
+
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:indeterminateTint="@color/main_white"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="인증번호 발송 중..."
+            android:textColor="@color/main_white"
+            android:layout_marginTop="10dp"
+            android:textSize="16sp"/>
+    </LinearLayout>
+
+</FrameLayout>

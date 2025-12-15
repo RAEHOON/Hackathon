@@ -8,13 +8,16 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import com.example.a20251215.R
 import com.example.a20251215.Retrofit.RetrofitClient
 import com.example.a20251215.ValidationUtils
+import com.google.android.material.textfield.TextInputLayout
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import kotlin.text.matches
 
 class SignupPasswordFragment : Fragment() {
 
@@ -34,23 +37,38 @@ class SignupPasswordFragment : Fragment() {
         val receivedNickname = arguments?.getString("nickname") ?: ""
         val receivedEmail = arguments?.getString("email") ?: ""
 
+        val tilPassword = view.findViewById<TextInputLayout>(R.id.til_password)
         val etPassword = view.findViewById<EditText>(R.id.et_password)
+
+        val tilPasswordAgain = view.findViewById<TextInputLayout>(R.id.til_password_again)
         val etPasswordAgain = view.findViewById<EditText>(R.id.et_password_again)
+
         val finishBtn = view.findViewById<Button>(R.id.btn_signup_finish)
+
+        etPassword.addTextChangedListener {
+            tilPassword.error = null
+        }
+
+        etPasswordAgain.addTextChangedListener {
+            tilPasswordAgain.error = null
+        }
 
         finishBtn.setOnClickListener {
             val pw = etPassword.text.toString().trim()
             val pwAgain = etPasswordAgain.text.toString().trim()
 
             if (!ValidationUtils.PW_PATTERN.matcher(pw).matches()) {
-                Toast.makeText(context, "비밀번호는 영문+숫자+특수문자 포함 8~20자여야 합니다.", Toast.LENGTH_SHORT).show()
+                tilPassword.error = "비밀번호는 영문+숫자+특수문자 포함 8~20자여야 합니다."
                 return@setOnClickListener
             }
 
             if (pw != pwAgain) {
-                Toast.makeText(context, "비밀번호가 일치하지 않습니다.", Toast.LENGTH_SHORT).show()
+                tilPasswordAgain.error = "비밀번호가 일치하지 않습니다."
                 return@setOnClickListener
             }
+
+            tilPassword.error = null
+            tilPasswordAgain.error = null
 
             requestSignup(receivedName, receivedNickname, receivedId, pw, receivedEmail)
         }
