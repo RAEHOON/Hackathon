@@ -9,7 +9,8 @@ data class LoginResponse(
 )
 
 data class LoginUserData(
-    @SerializedName("loginid") val loginid: String,
+    @SerializedName("member_id") val memberId: Int,
+    @SerializedName("loginid") val loginId: String,
     @SerializedName("email") val email: String,
     @SerializedName("username") val username: String,
     @SerializedName("nickname") val nickname: String
