@@ -3,15 +3,15 @@ package com.example.a20251215.Ranking
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
 
-class RankingPagerAdapter(
-    fragment: Fragment,
-    private val titles: List<String>
-) : FragmentStateAdapter(fragment) {
+class RankingPagerAdapter(fragment: Fragment) : FragmentStateAdapter(fragment) {
 
-    override fun getItemCount(): Int = titles.size
+    override fun getItemCount(): Int = 2
 
     override fun createFragment(position: Int): Fragment {
-        // "BEST" or "WORST"
-        return RankListFragment.newInstance(titles[position])
+        return if (position == 0) {
+            RankListFragment.newInstance(RankType.BEST)
+        } else {
+            RankListFragment.newInstance(RankType.WORST)
+        }
     }
 }

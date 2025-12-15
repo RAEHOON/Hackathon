@@ -1,102 +1,42 @@
 package com.example.a20251215.Ranking
 
-import android.graphics.Color
+import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.example.a20251215.R
 
 class RankListAdapter : RecyclerView.Adapter<RankListAdapter.VH>() {
 
-    private var type: String = "BEST" // BEST / WORST
-    private val items = mutableListOf<RankingItem>()
+    private val items = mutableListOf<RankItem>()
 
-    fun submit(type: String, items: List<RankingItem>) {
-        this.type = type
-        this.items.clear()
-        this.items.addAll(items)
+    fun submitList(newItems: List<RankItem>) {
+        items.clear()
+        items.addAll(newItems)
         notifyDataSetChanged()
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
-        val ctx = parent.context
-        fun dp(v: Int): Int = (v * ctx.resources.displayMetrics.density).toInt()
-
-        val row = LinearLayout(ctx).apply {
-            orientation = LinearLayout.HORIZONTAL
-            layoutParams = RecyclerView.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-            ).apply {
-                leftMargin = dp(16)
-                rightMargin = dp(16)
-                topMargin = dp(8)
-                bottomMargin = dp(8)
-            }
-            setPadding(dp(14), dp(12), dp(14), dp(12))
-            setBackgroundColor(Color.parseColor("#121212"))
-        }
-
-        val tvRank = TextView(ctx).apply {
-            textSize = 16f
-            setTextColor(Color.WHITE)
-            layoutParams = LinearLayout.LayoutParams(dp(44), ViewGroup.LayoutParams.WRAP_CONTENT)
-        }
-
-        val col = LinearLayout(ctx).apply {
-            orientation = LinearLayout.VERTICAL
-            layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
-        }
-
-        val tvNick = TextView(ctx).apply {
-            textSize = 15f
-            setTextColor(Color.WHITE)
-        }
-
-        val tvSub = TextView(ctx).apply {
-            textSize = 12f
-            setTextColor(Color.parseColor("#AEB6CF"))
-        }
-
-        val tvCount = TextView(ctx).apply {
-            textSize = 12f
-            setTextColor(Color.parseColor("#EDEFF6"))
-            alpha = 0.9f
-        }
-
-        col.addView(tvNick)
-        col.addView(tvSub)
-
-        row.addView(tvRank)
-        row.addView(col)
-        row.addView(tvCount)
-
-        return VH(row, tvRank, tvNick, tvSub, tvCount)
+        val v = LayoutInflater.from(parent.context)
+            .inflate(R.layout.item_rank_row, parent, false)
+        return VH(v)
     }
 
     override fun onBindViewHolder(holder: VH, position: Int) {
         val item = items[position]
-        val rankNum = position + 1
-
-        holder.tvRank.text = when (rankNum) {
-            1 -> if (type == "BEST") "🥇" else "😡"
-            2 -> if (type == "BEST") "🥈" else "😭"
-            3 -> if (type == "BEST") "🥉" else "😮‍💨"
-            else -> rankNum.toString()
-        }
-
-        holder.tvNick.text = item.nickname
-        holder.tvSub.text = if (type == "BEST") "이번 달 BEST $rankNum" else "이번 달 WORST $rankNum"
-        holder.tvCount.text = "인증 ${item.uploadCount}회"
+        holder.tvBadge.text = item.badge
+        holder.tvName.text = item.name
+        holder.tvCount.text = item.count
+        holder.tvSub.text = item.sub
     }
 
     override fun getItemCount(): Int = items.size
 
-    class VH(
-        parent: LinearLayout,
-        val tvRank: TextView,
-        val tvNick: TextView,
-        val tvSub: TextView,
-        val tvCount: TextView
-    ) : RecyclerView.ViewHolder(parent)
+    class VH(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val tvBadge: TextView = itemView.findViewById(R.id.tvBadge)
+        val tvName: TextView = itemView.findViewById(R.id.tvName)
+        val tvCount: TextView = itemView.findViewById(R.id.tvCount)
+        val tvSub: TextView = itemView.findViewById(R.id.tvSub)
+    }
 }
