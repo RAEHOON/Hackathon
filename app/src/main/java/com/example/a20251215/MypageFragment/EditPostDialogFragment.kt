@@ -1,14 +1,7 @@
 package com.example.a20251215.MypageFragment
 
-import android.graphics.Bitmap
-import android.graphics.Color
-import android.graphics.ImageDecoder
-import android.graphics.drawable.ColorDrawable
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.provider.MediaStore
-import android.util.Base64
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,14 +11,19 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.DialogFragment
+import com.bumptech.glide.Glide
 import com.example.a20251215.R
 import com.example.a20251215.Retrofit.ApiResponse
 import com.example.a20251215.Retrofit.RetrofitClient
 import com.google.android.material.button.MaterialButton
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import java.io.ByteArrayOutputStream
+import java.io.File
 
 class EditPostDialogFragment : DialogFragment() {
 
@@ -37,9 +35,8 @@ class EditPostDialogFragment : DialogFragment() {
         private const val ARG_CONTENT = "arg_content"
         private const val ARG_IMAGE_URL = "arg_image_url"
 
-        // (선택) 다른 방식 호환용 키
         const val RESULT_KEY_EDIT_DONE = "result_edit_done"
-        const val EXTRA_EDIT_DONE_ACTION = "edit_done_action" // "cancel" | "saved"
+        const val EXTRA_EDIT_DONE_ACTION = "edit_done_action"
 
         fun newInstance(
             postId: Int,
@@ -63,15 +60,14 @@ class EditPostDialogFragment : DialogFragment() {
     }
 
     private var callUpdate: Call<ApiResponse>? = null
-
     private var pickedImageUri: Uri? = null
     private var originImageUrl: String = ""
 
-     private val pickImageLauncher =
+    private val pickImageLauncher =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-            if (uri != null) {
-                pickedImageUri = uri
-                view?.findViewById<ImageView>(R.id.ivEditPhoto)?.setImageURI(uri)
+            uri?.let {
+                pickedImageUri = it
+                view?.findViewById<ImageView>(R.id.ivEditPhoto)?.setImageURI(it)
             }
         }
 
@@ -79,18 +75,18 @@ class EditPostDialogFragment : DialogFragment() {
         super.onStart()
         dialog?.window?.apply {
             setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-            setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            setBackgroundDrawableResource(android.R.color.transparent)
             setDimAmount(0.65f)
         }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-         return inflater.inflate(R.layout.framgment_mapage_calendar_edit_dialog, container, false)
+        return inflater.inflate(R.layout.framgment_mapage_calendar_edit_dialog, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        val postId = requireArguments().getInt(ARG_POST_ID, -1)
-        val memberId = requireArguments().getInt(ARG_MEMBER_ID, -1)
+        val postId = requireArguments().getInt(ARG_POST_ID)
+        val memberId = requireArguments().getInt(ARG_MEMBER_ID)
         val dateStr = requireArguments().getString(ARG_DATE, "")
         val originTitle = requireArguments().getString(ARG_TITLE, "")
         val originContent = requireArguments().getString(ARG_CONTENT, "")
@@ -109,6 +105,12 @@ class EditPostDialogFragment : DialogFragment() {
         etTitle.setText(originTitle)
         etContent.setText(originContent)
 
+        // 원본 이미지 표시
+        if (originImageUrl.isNotBlank()) {
+            Glide.with(this)
+                .load(originImageUrl)
+                .into(ivEditPhoto)
+        }
 
         fun setLoading(loading: Boolean) {
             overlay.visibility = if (loading) View.VISIBLE else View.GONE
@@ -118,17 +120,15 @@ class EditPostDialogFragment : DialogFragment() {
             btnClose.isEnabled = !loading
         }
 
-         fun closeBoth(action: String) {
-             parentFragmentManager.setFragmentResult(
+        fun closeBoth(action: String) {
+            parentFragmentManager.setFragmentResult(
                 CertDetailDialogFragment.REQ_EDIT_POST,
                 Bundle().apply { putString(CertDetailDialogFragment.EDIT_ACTION, action) }
             )
-
-             parentFragmentManager.setFragmentResult(
+            parentFragmentManager.setFragmentResult(
                 RESULT_KEY_EDIT_DONE,
                 Bundle().apply { putString(EXTRA_EDIT_DONE_ACTION, action) }
             )
-
             dismissAllowingStateLoss()
         }
 
@@ -143,65 +143,63 @@ class EditPostDialogFragment : DialogFragment() {
             val title = etTitle.text?.toString()?.trim().orEmpty()
             val content = etContent.text?.toString()?.trim().orEmpty()
 
-            if (postId <= 0 || memberId <= 0) {
-                Toast.makeText(requireContext(), "post_id/member_id가 이상해요", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-            if (title.isBlank()) {
-                Toast.makeText(requireContext(), "제목을 입력해줘!", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-            if (content.isBlank()) {
-                Toast.makeText(requireContext(), "내용을 입력해줘!", Toast.LENGTH_SHORT).show()
+            if (title.isBlank() || content.isBlank()) {
+                Toast.makeText(requireContext(), "제목과 내용을 모두 입력하세요.", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
             setLoading(true)
 
+            val postIdPart = postId.toString().toRequestBody("text/plain".toMediaTypeOrNull())
+            val memberIdPart = memberId.toString().toRequestBody("text/plain".toMediaTypeOrNull())
+            val titlePart = title.toRequestBody("text/plain".toMediaTypeOrNull())
+            val contentPart = content.toRequestBody("text/plain".toMediaTypeOrNull())
 
-            val imageUrlToSend = try {
-                val uri = pickedImageUri
-                if (uri != null) {
-                    val bmp = decodeBitmap(uri)
-                    bitmapToBase64Jpeg(bmp, quality = 80)
-                } else {
-                    originImageUrl
+            var imagePart: MultipartBody.Part? = null
+            pickedImageUri?.let { uri ->
+                try {
+                    val inputStream = requireContext().contentResolver.openInputStream(uri)
+                    val tempFile = File.createTempFile("upload_", ".jpg", requireContext().cacheDir)
+                    tempFile.outputStream().use { output -> inputStream?.copyTo(output) }
+
+                    val requestFile = tempFile.asRequestBody("image/*".toMediaTypeOrNull())
+                    imagePart = MultipartBody.Part.createFormData("image", tempFile.name, requestFile)
+
+                } catch (e: Exception) {
+                    setLoading(false)
+                    Toast.makeText(requireContext(), "이미지 처리 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
                 }
-            } catch (e: Exception) {
-                setLoading(false)
-                Toast.makeText(requireContext(), "이미지 처리 실패: ${e.message}", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
             }
 
             callUpdate?.cancel()
             callUpdate = RetrofitClient.apiService.updatePost(
-                postId = postId,
-                memberId = memberId,
-                title = title,
-                content = content,
-                imageUrl = imageUrlToSend
+                postIdPart,
+                memberIdPart,
+                titlePart,
+                contentPart,
+                imagePart
             )
 
             callUpdate?.enqueue(object : Callback<ApiResponse> {
                 override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
+                    setLoading(false)
                     if (!isAdded) return
-                    val body = response.body()
 
+                    val body = response.body()
                     if (!response.isSuccessful || body == null) {
-                        setLoading(false)
                         Toast.makeText(requireContext(), "수정 실패 (HTTP ${response.code()})", Toast.LENGTH_SHORT).show()
                         return
                     }
 
                     if (!body.success) {
-                        setLoading(false)
                         Toast.makeText(requireContext(), body.message, Toast.LENGTH_SHORT).show()
                         return
                     }
 
                     Toast.makeText(requireContext(), "수정 완료!", Toast.LENGTH_SHORT).show()
 
-                     parentFragmentManager.setFragmentResult(
+                    parentFragmentManager.setFragmentResult(
                         CertDetailDialogFragment.RESULT_KEY_POST_CHANGED,
                         Bundle().apply {
                             putString(CertDetailDialogFragment.EXTRA_ACTION, "updated")
@@ -210,7 +208,7 @@ class EditPostDialogFragment : DialogFragment() {
                         }
                     )
 
-                     closeBoth("saved")
+                    closeBoth("saved")
                 }
 
                 override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
@@ -220,25 +218,6 @@ class EditPostDialogFragment : DialogFragment() {
                 }
             })
         }
-    }
-
-    private fun decodeBitmap(uri: Uri): Bitmap {
-        return if (Build.VERSION.SDK_INT >= 28) {
-            val source = ImageDecoder.createSource(requireContext().contentResolver, uri)
-            ImageDecoder.decodeBitmap(source) { decoder, _, _ ->
-                decoder.isMutableRequired = false
-            }
-        } else {
-            @Suppress("DEPRECATION")
-            MediaStore.Images.Media.getBitmap(requireContext().contentResolver, uri)
-        }
-    }
-
-    private fun bitmapToBase64Jpeg(bitmap: Bitmap, quality: Int): String {
-        val baos = ByteArrayOutputStream()
-        bitmap.compress(Bitmap.CompressFormat.JPEG, quality, baos)
-        val bytes = baos.toByteArray()
-        return Base64.encodeToString(bytes, Base64.NO_WRAP)
     }
 
     override fun onDestroyView() {
