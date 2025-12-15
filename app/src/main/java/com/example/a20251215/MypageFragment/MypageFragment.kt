@@ -1,4 +1,4 @@
-package com.example.a20251215.MypageFragment
+ package com.example.a20251215.MypageFragment
 
 import android.content.Context
 import android.os.Bundle
@@ -7,9 +7,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.example.a20251215.Post.PostListResponse
 import com.example.a20251215.R
+import com.example.a20251215.Retrofit.RetrofitClient
 import com.example.a20251215.holiday.KasiRetrofit
 import com.prolificinteractive.materialcalendarview.CalendarDay
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView
@@ -18,6 +21,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.threeten.bp.LocalDate
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class MypageFragment : Fragment() {
 
@@ -27,11 +33,11 @@ class MypageFragment : Fragment() {
         private const val PREF_NAME = "UserInfo"
         private const val KEY_NICKNAME = "nickname"
 
-         private const val KEY_USER_ID_1 = "user_id"
+        private const val KEY_MEMBER_ID = "member_id"
+        private const val KEY_USER_ID_1 = "user_id"
         private const val KEY_USER_ID_2 = "id"
 
-         private const val ARG_TARGET_USER_ID = "targetUserId"
-
+        private const val ARG_TARGET_USER_ID = "targetUserId"
         private const val DIALOG_TAG = "cert_detail"
     }
 
@@ -40,6 +46,14 @@ class MypageFragment : Fragment() {
     private lateinit var tvNickname: TextView
     private lateinit var tvProfileSub: TextView
     private lateinit var calendarView: MaterialCalendarView
+
+    private lateinit var tvStat1: TextView
+    private lateinit var tvStat2: TextView
+    private lateinit var tvStat3: TextView
+
+    private var callPosts: Call<PostListResponse>? = null
+    private var cachedHolidayDays: Set<CalendarDay> = emptySet()
+    private var cachedCertDays: Set<CalendarDay> = emptySet()
 
     private val KASI_SERVICE_KEY =
         "2b5ae7ad6f3c0c0d60f341541b0bd15c3a99e6a0c7145f7719d730a5726ffbeb"
@@ -62,9 +76,7 @@ class MypageFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
-        return inflater.inflate(R.layout.fragment_mypage, container, false)
-    }
+    ): View = inflater.inflate(R.layout.fragment_mypage, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -73,121 +85,156 @@ class MypageFragment : Fragment() {
         tvProfileSub = view.findViewById(R.id.tvProfileSub)
         calendarView = view.findViewById(R.id.calendarView)
 
-        Log.d(TAG, "onViewCreated() called")
+        tvStat1 = view.findViewById(R.id.tvStat1)
+        tvStat2 = view.findViewById(R.id.tvStat2)
+        tvStat3 = view.findViewById(R.id.tvStat3)
 
-         val myUserId = loadMyUserIdFromPrefs()
-        val targetUserId = arguments?.getInt(ARG_TARGET_USER_ID, myUserId) ?: myUserId
-        Log.d(TAG, "myUserId=$myUserId targetUserId=$targetUserId")
+        val myUserId = loadMyUserIdFromPrefs()
 
-        // 닉네임
-        val nick = loadNicknameFromPrefs()
-        tvNickname.text = nick
-        Log.d(TAG, "tvNickname set to '$nick'")
+        val argTarget = arguments?.getInt(ARG_TARGET_USER_ID, -1) ?: -1
+        val targetUserId = if (argTarget > 0) argTarget else myUserId
 
+        tvNickname.text = loadNicknameFromPrefs()
         startQuoteTicker_5sec()
 
-        // 공휴일/일요일 데코
+         parentFragmentManager.setFragmentResultListener(
+            CertDetailDialogFragment.RESULT_KEY_POST_CHANGED,
+            viewLifecycleOwner
+        ) { _, _ ->
+            val cur = calendarView.currentDate.date
+            refreshMonthAll(myUserId, cur.year, cur.monthValue)
+        }
+
         val nowLocal: LocalDate = calendarView.currentDate.date
-        loadAndDecorateMonth(nowLocal.year, nowLocal.monthValue)
+        refreshMonthAll(myUserId, nowLocal.year, nowLocal.monthValue)
 
         calendarView.setOnMonthChangedListener { _, day ->
             val local: LocalDate = day.date
-            loadAndDecorateMonth(local.year, local.monthValue)
+            refreshMonthAll(myUserId, local.year, local.monthValue)
         }
 
-         calendarView.setOnDateChangedListener { _, day, _ ->
+        calendarView.setOnDateChangedListener { _, day, _ ->
             val local: LocalDate = day.date
-            showCertDialog(targetUserId, myUserId, local)
+
+            if (myUserId <= 0) {
+                Toast.makeText(requireContext(), "로그인 정보(member_id)가 없어요", Toast.LENGTH_SHORT).show()
+                return@setOnDateChangedListener
+            }
+
+            val realTarget = if (targetUserId > 0) targetUserId else myUserId
+            showCertDialog(realTarget, myUserId, local)
         }
     }
 
+    private fun refreshMonthAll(memberId: Int, year: Int, month1to12: Int) {
+        loadAndDecorateMonth(year, month1to12)           // 공휴일
+        loadCertDaysAndTopStats(memberId, year, month1to12) // 인증 점 + 상단 통계
+    }
+
     private fun showCertDialog(targetUserId: Int, myUserId: Int, date: LocalDate) {
-         if (parentFragmentManager.findFragmentByTag(DIALOG_TAG) != null) return
+        if (parentFragmentManager.findFragmentByTag(DIALOG_TAG) != null) return
 
         CertDetailDialogFragment
             .newInstance(targetUserId = targetUserId, myUserId = myUserId, date = date)
             .show(parentFragmentManager, DIALOG_TAG)
     }
 
-    private fun loadNicknameFromPrefs(): String {
-        val prefs = requireContext().getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-        val nick = prefs.getString(KEY_NICKNAME, null)
+     private fun loadCertDaysAndTopStats(memberId: Int, year: Int, month1to12: Int) {
+        if (memberId <= 0) return
 
-        Log.d(TAG, "loadNicknameFromPrefs: file=$PREF_NAME nickname='$nick'")
-        Log.d(TAG, "prefs all = ${prefs.all}")
+        callPosts?.cancel()
+        callPosts = RetrofitClient.apiService.getMyPosts(memberId)
 
-        return nick ?: "닉네임"
-    }
+        callPosts?.enqueue(object : Callback<PostListResponse> {
+            override fun onResponse(call: Call<PostListResponse>, response: Response<PostListResponse>) {
+                if (!isAdded) return
 
-    private fun loadMyUserIdFromPrefs(): Int {
-        val prefs = requireContext().getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+                val body = response.body()
+                if (!response.isSuccessful || body == null || !body.success) {
+                    setTopStats(monthCount = 0, streak = 0)
+                    cachedCertDays = emptySet()
+                    applyDecoratorsAll()
+                    return
+                }
 
-        val id1 = prefs.getInt(KEY_USER_ID_1, -1)
-        if (id1 != -1) return id1
+                 val allDates: Set<LocalDate> = body.data.mapNotNull { p ->
+                    parseDate(p.createdAt)
+                }.toSet()
 
-        val id2 = prefs.getInt(KEY_USER_ID_2, -1)
-        if (id2 != -1) return id2
+                 val monthDates: Set<LocalDate> = allDates.filter { d ->
+                    d.year == year && d.monthValue == month1to12
+                }.toSet()
 
-        // 혹시 String으로 저장했을 가능성까지 안전하게 처리
-        val s1 = prefs.getString(KEY_USER_ID_1, null)?.toIntOrNull()
-        if (s1 != null) return s1
+                val monthCount = monthDates.size
 
-        val s2 = prefs.getString(KEY_USER_ID_2, null)?.toIntOrNull()
-        if (s2 != null) return s2
+                 val streak = computeStreakFromLast(allDates)
 
-        Log.w(TAG, "loadMyUserIdFromPrefs: user id not found. return -1")
-        return -1
-    }
+                setTopStats(monthCount = monthCount, streak = streak)
 
-    private fun startQuoteTicker_5sec() {
-        quoteIndex = 0
-        tvProfileSub.text = quotes[quoteIndex]
-        tvProfileSub.alpha = 0.7f
-
-        quoteJob?.cancel()
-        quoteJob = viewLifecycleOwner.lifecycleScope.launch {
-            while (isActive) {
-                delay(5_000L)
-                showNextQuoteWithSlideUp()
+                 cachedCertDays = monthDates.map { CalendarDay.from(it) }.toSet()
+                applyDecoratorsAll()
             }
+
+            override fun onFailure(call: Call<PostListResponse>, t: Throwable) {
+                if (!isAdded) return
+                Log.e(TAG, "loadCertDaysAndTopStats FAIL: ${t.message}", t)
+                setTopStats(monthCount = 0, streak = 0)
+                cachedCertDays = emptySet()
+                applyDecoratorsAll()
+            }
+        })
+    }
+
+    private fun setTopStats(monthCount: Int, streak: Int) {
+        tvStat1.text = "이번 달 ${monthCount}회"
+        tvStat2.text = "연속 ${streak}일"
+        tvStat3.text = "내 랭킹 ${rankLabel(monthCount)}"
+    }
+
+    private fun rankLabel(monthCount: Int): String {
+        return when {
+            monthCount <= 5 -> "WORST"
+            monthCount <= 10 -> "SOSO"
+            monthCount <= 20 -> "BEST"
+            else -> "LEGEND"
         }
     }
 
-    private fun showNextQuoteWithSlideUp() {
-        val slide = dp(10f)
-
-        tvProfileSub.animate()
-            .translationY(-slide)
-            .alpha(0f)
-            .setDuration(220L)
-            .withEndAction {
-                quoteIndex = (quoteIndex + 1) % quotes.size
-                tvProfileSub.text = quotes[quoteIndex]
-
-                tvProfileSub.translationY = slide
-                tvProfileSub.animate()
-                    .translationY(0f)
-                    .alpha(0.7f)
-                    .setDuration(260L)
-                    .start()
-            }
-            .start()
+     private fun computeStreakFromLast(certDates: Set<LocalDate>): Int {
+        if (certDates.isEmpty()) return 0
+        var d = certDates.maxOrNull() ?: return 0
+        var count = 0
+        while (certDates.contains(d)) {
+            count++
+            d = d.minusDays(1)
+        }
+        return count
     }
 
-    private fun loadAndDecorateMonth(year: Int, month1to12: Int) {
-        applyDecorators(year, month1to12, emptySet())
+    private fun parseDate(createdAt: String?): LocalDate? {
+        val s = createdAt?.trim().orEmpty()
+        if (s.length < 10) return null
+        return try {
+            LocalDate.parse(s.substring(0, 10))
+        } catch (_: Exception) {
+            null
+        }
+    }
+
+     private fun loadAndDecorateMonth(year: Int, month1to12: Int) {
+        cachedHolidayDays = emptySet()
+        applyDecoratorsAll()
 
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val monthStr = String.format("%02d", month1to12)
-
                 val res = KasiRetrofit.api.getRestDeInfo(
                     serviceKey = KASI_SERVICE_KEY,
                     solYear = year.toString(),
                     solMonth = monthStr
                 )
-
                 if (!res.isSuccessful) return@launch
+
                 val xml = res.body().orEmpty()
                 if (xml.isBlank()) return@launch
 
@@ -200,24 +247,36 @@ class MypageFragment : Fragment() {
                         val m = raw.substring(4, 6).toIntOrNull() ?: return@mapNotNull null
                         val d = raw.substring(6, 8).toIntOrNull() ?: return@mapNotNull null
 
-                        val local = LocalDate.of(y, m, d)
-                        CalendarDay.from(local)
+                        CalendarDay.from(LocalDate.of(y, m, d))
                     }
                     .toSet()
 
-                applyDecorators(year, month1to12, holidays)
+                cachedHolidayDays = holidays
+                applyDecoratorsAll()
             } catch (e: Exception) {
                 Log.e(TAG, "loadAndDecorateMonth error: ${e.message}", e)
             }
         }
     }
 
-    private fun applyDecorators(year: Int, month1to12: Int, holidays: Set<CalendarDay>) {
+    private fun applyDecoratorsAll() {
         calendarView.removeDecorators()
         calendarView.addDecorator(SundayDecorator())
 
-        if (holidays.isNotEmpty()) {
-            calendarView.addDecorator(HolidayDecorator(holidays))
+        if (cachedHolidayDays.isNotEmpty()) {
+            calendarView.addDecorator(HolidayDecorator(cachedHolidayDays))
+        }
+
+         if (cachedCertDays.isNotEmpty()) {
+            calendarView.addDecorator(
+                PostMarkDecorator(
+                    days = cachedCertDays,
+                    dotRadiusPx = dp(2.8f),
+                    color = android.graphics.Color.RED,
+                    offsetXPx = dp(6.0f),
+                    offsetYPx = dp(2.0f)
+                )
+            )
         }
 
         calendarView.invalidateDecorators()
@@ -225,18 +284,51 @@ class MypageFragment : Fragment() {
 
     private fun dp(value: Float): Float = value * resources.displayMetrics.density
 
-    override fun onResume() {
-        super.onResume()
-        if (!::tvNickname.isInitialized) return
+    private fun loadNicknameFromPrefs(): String {
+        val prefs = requireContext().getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getString(KEY_NICKNAME, null) ?: "닉네임"
+    }
 
-        val nick = loadNicknameFromPrefs()
-        tvNickname.text = nick
-        Log.d(TAG, "onResume() updated nickname='$nick'")
+    private fun loadMyUserIdFromPrefs(): Int {
+        val prefs = requireContext().getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+
+        fun readIntOrString(key: String): Int {
+            val vInt = prefs.getInt(key, Int.MIN_VALUE)
+            if (vInt != Int.MIN_VALUE) return vInt
+
+            val vStr = prefs.getString(key, null)?.toIntOrNull()
+            if (vStr != null) return vStr
+
+            return -1
+        }
+
+        readIntOrString(KEY_MEMBER_ID).takeIf { it > 0 }?.let { return it }
+        readIntOrString(KEY_USER_ID_1).takeIf { it > 0 }?.let { return it }
+        readIntOrString(KEY_USER_ID_2).takeIf { it > 0 }?.let { return it }
+
+        return -1
+    }
+
+    private fun startQuoteTicker_5sec() {
+        quoteIndex = 0
+        tvProfileSub.text = quotes[quoteIndex]
+        tvProfileSub.alpha = 0.7f
+
+        quoteJob?.cancel()
+        quoteJob = viewLifecycleOwner.lifecycleScope.launch {
+            while (isActive) {
+                delay(5_000L)
+                quoteIndex = (quoteIndex + 1) % quotes.size
+                tvProfileSub.text = quotes[quoteIndex]
+            }
+        }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         quoteJob?.cancel()
         quoteJob = null
+        callPosts?.cancel()
+        callPosts = null
     }
 }

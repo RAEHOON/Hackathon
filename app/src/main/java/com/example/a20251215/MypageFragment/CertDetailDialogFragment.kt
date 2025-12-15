@@ -1,8 +1,10 @@
 package com.example.a20251215.MypageFragment
 
+import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,12 +12,15 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
 import com.example.a20251215.Post.Post
 import com.example.a20251215.Post.PostListResponse
 import com.example.a20251215.R
+import com.example.a20251215.Retrofit.ApiResponse
 import com.example.a20251215.Retrofit.RetrofitClient
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.threeten.bp.LocalDate
 import retrofit2.Call
 import retrofit2.Callback
@@ -24,9 +29,19 @@ import retrofit2.Response
 class CertDetailDialogFragment : DialogFragment() {
 
     companion object {
+        private const val TAG = "CertDetailDialog"
+
         private const val ARG_TARGET_USER_ID = "targetUserId"
         private const val ARG_MY_USER_ID = "myUserId"
         private const val ARG_DATE = "date" // yyyy-MM-dd
+
+        const val RESULT_KEY_POST_CHANGED = "result_post_changed"
+        const val EXTRA_ACTION = "action" // "updated" | "deleted"
+        const val EXTRA_DATE = "date"
+        const val EXTRA_POST_ID = "post_id"
+
+         const val REQ_EDIT_POST = "req_edit_post"
+        const val EDIT_ACTION = "edit_action" // "cancel" | "saved"
 
         fun newInstance(targetUserId: Int, myUserId: Int, date: LocalDate): CertDetailDialogFragment {
             return CertDetailDialogFragment().apply {
@@ -39,13 +54,27 @@ class CertDetailDialogFragment : DialogFragment() {
         }
     }
 
-    // ✅ companion object 안에 두면 안됨 (인스턴스 공유로 꼬임)
-    private var call: Call<PostListResponse>? = null
+    private var callList: Call<PostListResponse>? = null
+    private var callDelete: Call<ApiResponse>? = null
+
     private var currentPost: Post? = null
+
+    private var cachedMemberId: Int = -1
+    private var cachedDateStr: String = ""
+    private var cachedIsOwner: Boolean = false
+
+    private var tvTitle: TextView? = null
+    private var tvDate: TextView? = null
+    private var tvContent: TextView? = null
+    private var ivPhoto: ImageView? = null
+    private var layoutActions: LinearLayout? = null
+    private var btnEdit: View? = null
+    private var btnDelete: View? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setStyle(STYLE_NO_TITLE, 0)
+        Log.d(TAG, "onCreate()")
     }
 
     override fun onStart() {
@@ -57,139 +86,263 @@ class CertDetailDialogFragment : DialogFragment() {
         }
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.framgment_mapage_calendar_dialogl, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        val targetUserId = requireArguments().getInt(ARG_TARGET_USER_ID)
-        val myUserId = requireArguments().getInt(ARG_MY_USER_ID)
+        val targetUserId = requireArguments().getInt(ARG_TARGET_USER_ID, -1)
+        val myUserId = requireArguments().getInt(ARG_MY_USER_ID, -1)
         val dateStr = requireArguments().getString(ARG_DATE) ?: LocalDate.now().toString()
         val isOwner = (targetUserId == myUserId)
 
-        val tvDate = view.findViewById<TextView>(R.id.tvDate)
-        val tvContent = view.findViewById<TextView>(R.id.tvContent)
-        val ivPhoto = view.findViewById<ImageView>(R.id.ivPhoto)
+        cachedMemberId = targetUserId // owner면 myUserId랑 같음
+        cachedDateStr = dateStr
+        cachedIsOwner = isOwner
+
+        val prefsAll = requireContext()
+            .getSharedPreferences("UserInfo", Context.MODE_PRIVATE)
+            .all
+        Log.d(TAG, "open: targetUserId=$targetUserId myUserId=$myUserId date=$dateStr isOwner=$isOwner")
+        Log.d(TAG, "prefs snapshot(UserInfo)=$prefsAll")
+
+        tvTitle = view.findViewById(R.id.tvTitle)
+        tvDate = view.findViewById(R.id.tvDate)
+        tvContent = view.findViewById(R.id.tvContent)
+        ivPhoto = view.findViewById(R.id.ivPhoto)
 
         val btnClose = view.findViewById<ImageButton>(R.id.btnClose)
+        layoutActions = view.findViewById(R.id.layoutActions)
+        btnEdit = view.findViewById(R.id.btnEdit)
+        btnDelete = view.findViewById(R.id.btnDelete)
 
-        val layoutActions = view.findViewById<LinearLayout>(R.id.layoutActions)
-        val btnEdit = view.findViewById<View>(R.id.btnEdit)
-        val btnDelete = view.findViewById<View>(R.id.btnDelete)
+        tvDate?.text = dateStr
+        tvTitle?.text = "제목"
+        tvContent?.text = "불러오는 중..."
+        ivPhoto?.setImageDrawable(null)
 
-        tvDate.text = dateStr
-        tvContent.text = "불러오는 중..."
-        ivPhoto.setImageDrawable(null)
+        layoutActions?.isVisible = isOwner
+        setActionsEnabled(btnEdit, btnDelete, enabled = false)
 
-        // ✅ 글 주인일 때만 "수정/삭제" 영역이 보일 수 있음 (글 없으면 아래에서 또 숨김)
-        layoutActions.isVisible = isOwner
+         parentFragmentManager.setFragmentResultListener(REQ_EDIT_POST, viewLifecycleOwner) { _, b ->
+            val action = b.getString(EDIT_ACTION, "")
+            Log.d(TAG, "REQ_EDIT_POST received: action=$action -> close detail dialog")
+            if (action == "cancel" || action == "saved") {
+                dismissAllowingStateLoss()
+            }
+        }
+
+         parentFragmentManager.setFragmentResultListener(
+            EditPostDialogFragment.RESULT_KEY_EDIT_DONE,
+            viewLifecycleOwner
+        ) { _, b ->
+            val action = b.getString(EditPostDialogFragment.EXTRA_EDIT_DONE_ACTION, "")
+            Log.d(TAG, "RESULT_KEY_EDIT_DONE received: action=$action -> close detail dialog")
+            if (action == "cancel" || action == "saved") {
+                dismissAllowingStateLoss()
+            }
+        }
 
         btnClose.setOnClickListener { dismissAllowingStateLoss() }
 
-        btnEdit.setOnClickListener {
-            if (!isOwner) return@setOnClickListener
+        btnEdit?.setOnClickListener {
+            if (!cachedIsOwner) return@setOnClickListener
             val post = currentPost ?: return@setOnClickListener
-            // TODO: 수정 화면 이동 (post.postId 넘기기)
-            // startActivity(Intent(requireContext(), EditPostActivity::class.java).putExtra("post_id", post.postId))
-            dismissAllowingStateLoss()
+
+            EditPostDialogFragment.newInstance(
+                postId = post.postId,
+                memberId = cachedMemberId,
+                dateStr = cachedDateStr,
+                title = post.title,
+                content = post.content,
+                imageUrl = post.imageUrl ?: ""
+            ).show(parentFragmentManager, "EditPostDialog")
         }
 
-        btnDelete.setOnClickListener {
-            if (!isOwner) return@setOnClickListener
+        btnDelete?.setOnClickListener {
+            if (!cachedIsOwner) return@setOnClickListener
             val post = currentPost ?: return@setOnClickListener
-            // TODO: 삭제 confirm + delete_post.php 호출 (post.postId, myUserId)
-            dismissAllowingStateLoss()
+
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle("삭제할까요?")
+                .setMessage("이 게시글은 바로 삭제됩니다.")
+                .setNegativeButton("취소", null)
+                .setPositiveButton("삭제") { _, _ ->
+                    requestDeletePost(postId = post.postId, memberId = cachedMemberId)
+                }
+                .show()
         }
 
-        // ✅ 서버에서 "해당 날짜 인증 게시글" 로드
-        loadPostOfDate(
-            targetUserId = targetUserId,
+        loadPostByDate_usingGetMyPosts(
+            memberId = targetUserId,
             dateStr = dateStr,
-            isOwner = isOwner,
-            tvContent = tvContent,
-            ivPhoto = ivPhoto,
-            layoutActions = layoutActions
+            isOwner = isOwner
         )
     }
 
-    private fun loadPostOfDate(
-        targetUserId: Int,
-        dateStr: String, // yyyy-MM-dd
-        isOwner: Boolean,
-        tvContent: TextView,
-        ivPhoto: ImageView,
-        layoutActions: LinearLayout
-    ) {
+    private fun loadPostByDate_usingGetMyPosts(memberId: Int, dateStr: String, isOwner: Boolean) {
         currentPost = null
-        tvContent.text = "불러오는 중..."
-        ivPhoto.setImageDrawable(null)
+        tvContent?.text = "불러오는 중..."
+        ivPhoto?.setImageDrawable(null)
 
-        // ✅ 글 로드 전엔 숨겼다가, 성공+내글이면 보여주기 (버튼 사라진 원인 방지)
-        layoutActions.isVisible = false
+        if (memberId <= 0) {
+            tvContent?.text = "유저 정보(member_id)가 없어서 불러올 수 없어요"
+            applyNoPostUi(isOwner)
+            return
+        }
 
-        call?.cancel()
-        call = RetrofitClient.apiService.getUserPosts(targetUserId)
+        if (isOwner) {
+            layoutActions?.isVisible = true
+            setActionsEnabled(btnEdit, btnDelete, enabled = false)
+        } else {
+            layoutActions?.isVisible = false
+        }
 
-        call?.enqueue(object : Callback<PostListResponse> {
+        callList?.cancel()
+        callList = RetrofitClient.apiService.getMyPosts(memberId)
+
+        callList?.enqueue(object : Callback<PostListResponse> {
             override fun onResponse(call: Call<PostListResponse>, response: Response<PostListResponse>) {
                 if (!isAdded) return
-
-                if (!response.isSuccessful) {
-                    tvContent.text = "불러오기 실패 (HTTP ${response.code()})"
-                    layoutActions.isVisible = false
-                    return
-                }
-
                 val body = response.body()
-                if (body == null || !body.success) {
-                    tvContent.text = body?.message ?: "불러오기 실패"
-                    layoutActions.isVisible = false
+
+                if (!response.isSuccessful || body == null) {
+                    tvContent?.text = "불러오기 실패 (HTTP ${response.code()})"
+                    applyNoPostUi(isOwner)
                     return
                 }
 
-                val post = pickPostByDate(body.data, dateStr)
-                if (post == null) {
-                    tvContent.text = "이 날짜에 인증한 게시글이 없어요 🙂"
-                    layoutActions.isVisible = false
+                if (!body.success) {
+                    tvContent?.text = body.message
+                    applyNoPostUi(isOwner)
                     return
                 }
 
-                currentPost = post
-                tvContent.text = post.content
+                val picked = pickPostByDate(body.data, dateStr)
+                if (picked == null) {
+                    tvContent?.text = "이 날짜에 인증한 게시글이 없어요 🙂"
+                    applyNoPostUi(isOwner)
+                    return
+                }
 
-                // ✅ 이미지 로딩(원하면 Glide 추가해서 사용)
-                // if (!post.imageUrl.isNullOrBlank()) {
-                //     Glide.with(ivPhoto).load(post.imageUrl).into(ivPhoto)
-                // }
+                currentPost = picked
+                tvTitle?.text = picked.title
+                tvContent?.text = picked.content
+                renderImage(picked.imageUrl)
 
-                // ✅ 내 글 + 실제 글 있을 때만 수정/삭제 노출
-                layoutActions.isVisible = isOwner
+                if (isOwner) {
+                    layoutActions?.isVisible = true
+                    setActionsEnabled(btnEdit, btnDelete, enabled = true)
+                } else {
+                    layoutActions?.isVisible = false
+                }
             }
 
             override fun onFailure(call: Call<PostListResponse>, t: Throwable) {
                 if (!isAdded) return
-                tvContent.text = "네트워크 오류: ${t.message ?: "unknown"}"
-                layoutActions.isVisible = false
+                tvContent?.text = "네트워크 오류: ${t.message ?: "unknown"}"
+                applyNoPostUi(isOwner)
             }
         })
     }
 
-    // created_at이 "YYYY-MM-DD HH:mm:ss" 형태라고 가정
-    private fun pickPostByDate(list: List<Post>, dateStr: String): Post? {
-        val filtered = list.filter { p ->
-            p.createdAt.take(10) == dateStr
+    private fun requestDeletePost(postId: Int, memberId: Int) {
+        if (memberId <= 0) {
+            Toast.makeText(requireContext(), "member_id가 없어서 삭제할 수 없어요", Toast.LENGTH_SHORT).show()
+            return
         }
-        return filtered.maxByOrNull { it.createdAt } // 같은 날짜 여러개면 최신 1개
+
+        setActionsEnabled(btnEdit, btnDelete, enabled = false)
+
+        callDelete?.cancel()
+        callDelete = RetrofitClient.apiService.deletePost(postId = postId, memberId = memberId)
+
+        callDelete?.enqueue(object : Callback<ApiResponse> {
+            override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
+                if (!isAdded) return
+                val body = response.body()
+
+                if (!response.isSuccessful || body == null) {
+                    Toast.makeText(requireContext(), "삭제 실패 (HTTP ${response.code()})", Toast.LENGTH_SHORT).show()
+                    setActionsEnabled(btnEdit, btnDelete, enabled = true)
+                    return
+                }
+
+                if (!body.success) {
+                    Toast.makeText(requireContext(), body.message ?: "삭제 실패", Toast.LENGTH_SHORT).show()
+                    setActionsEnabled(btnEdit, btnDelete, enabled = true)
+                    return
+                }
+
+                Toast.makeText(requireContext(), "삭제 완료!", Toast.LENGTH_SHORT).show()
+                sendChangedResult(action = "deleted", postId = postId)
+                dismissAllowingStateLoss()
+            }
+
+            override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
+                if (!isAdded) return
+                Toast.makeText(requireContext(), "네트워크 오류: ${t.message}", Toast.LENGTH_SHORT).show()
+                setActionsEnabled(btnEdit, btnDelete, enabled = true)
+            }
+        })
+    }
+
+    private fun sendChangedResult(action: String, postId: Int) {
+        val b = Bundle().apply {
+            putString(EXTRA_ACTION, action)
+            putString(EXTRA_DATE, cachedDateStr)
+            putInt(EXTRA_POST_ID, postId)
+        }
+        parentFragmentManager.setFragmentResult(RESULT_KEY_POST_CHANGED, b)
+    }
+
+    private fun applyNoPostUi(isOwner: Boolean) {
+        currentPost = null
+        ivPhoto?.setImageDrawable(null)
+        tvTitle?.text = "제목"
+
+        if (isOwner) {
+            layoutActions?.isVisible = true
+            setActionsEnabled(btnEdit, btnDelete, enabled = false)
+        } else {
+            layoutActions?.isVisible = false
+        }
+    }
+
+    private fun pickPostByDate(list: List<Post>, dateStr: String): Post? {
+        val matched = list.filter { p ->
+            val created = p.createdAt.trim()
+            val day = if (created.length >= 10) created.substring(0, 10) else created
+            day == dateStr
+        }
+        return matched.maxByOrNull { it.createdAt }
+    }
+
+    private fun setActionsEnabled(edit: View?, del: View?, enabled: Boolean) {
+        edit?.isEnabled = enabled
+        del?.isEnabled = enabled
+        val alpha = if (enabled) 1.0f else 0.35f
+        edit?.alpha = alpha
+        del?.alpha = alpha
+    }
+
+    private fun renderImage(imageUrl: String?) {
+        val iv = ivPhoto ?: return
+        val url = imageUrl?.trim().orEmpty()
+        if (url.isBlank()) {
+            iv.setImageDrawable(null)
+            return
+        }
+
+
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        call?.cancel()
-        call = null
+        callList?.cancel()
+        callDelete?.cancel()
+        callList = null
+        callDelete = null
         currentPost = null
     }
 }
