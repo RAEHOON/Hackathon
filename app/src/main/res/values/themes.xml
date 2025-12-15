@@ -26,4 +26,21 @@
         <item name="android:textColor">@android:color/white</item>
     </style>
 
+    <!-- 다이얼로그용 커스텀 테마 -->
+    <style name="CustomAlertDialog" parent="ThemeOverlay.MaterialComponents.Dialog.Alert">
+        <item name="android:background">#121212</item>
+        <item name="android:textColorPrimary">#FFFFFF</item>
+        <item name="android:buttonBarPositiveButtonStyle">@style/CustomDialogPositiveButton</item>
+        <item name="android:buttonBarNegativeButtonStyle">@style/CustomDialogNegativeButton</item>
+    </style>
+
+    <style name="CustomDialogPositiveButton" parent="Widget.AppCompat.Button.ButtonBar.AlertDialog">
+        <item name="android:textColor">#FF6B6B</item> <!-- 강조 버튼 색 -->
+    </style>
+
+    <style name="CustomDialogNegativeButton" parent="Widget.AppCompat.Button.ButtonBar.AlertDialog">
+        <item name="android:textColor">#888888</item> <!-- 취소 버튼 색 -->
+    </style>
+
+
 </resources>
