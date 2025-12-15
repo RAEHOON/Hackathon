@@ -63,18 +63,21 @@ class SettingsFragment : Fragment() {
         }
 
         view.findViewById<TextView>(R.id.itemLogout).setOnClickListener {
-            AlertDialog.Builder(requireContext())
+            AlertDialog.Builder(requireContext(), R.style.CustomAlertDialog)
                 .setTitle("로그아웃")
                 .setMessage("정말 로그아웃하시겠습니까?")
+                .setNegativeButton("취소", null)  // ← 왼쪽
                 .setPositiveButton("확인") { _, _ ->
                     sharedPref.edit().clear().apply()
                     val intent = Intent(requireContext(), LoginActivity::class.java)
                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                     startActivity(intent)
                 }
-                .setNegativeButton("취소", null)
                 .show()
         }
+
+
+
 
 
         view.findViewById<TextView>(R.id.itemWithdraw).setOnClickListener {
