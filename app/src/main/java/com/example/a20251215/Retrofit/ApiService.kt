@@ -1,8 +1,10 @@
 package com.example.a20251215.Retrofit
 
+import com.example.a20251215.Find.FindIdResponse
 import com.example.a20251215.LoginResponse
 import com.example.a20251215.Post.PostDetailResponse
 import com.example.a20251215.Post.PostListResponse
+import com.example.a20251215.Ranking.RankingResponse
 import com.example.a20251215.Retrofit.ApiResponse
 import com.example.a20251215.Sign.SignupResponse
 
@@ -110,6 +112,64 @@ interface ApiService {
     fun checkEmailDuplicate(
         @Field("email") email: String
     ): Call<ApiResponse>
+
+    @FormUrlEncoded
+    @POST("update_nickname.php")
+    fun updateNickname(
+        @Field("member_id") memberId: Int,
+        @Field("nickname") nickname: String
+    ): Call<ApiResponse>
+
+    @FormUrlEncoded
+    @POST("reset_password.php")
+    fun resetPassword(
+        @Field("member_id") memberId: Int,
+        @Field("current_password") currentPassword: String,
+        @Field("new_password") newPassword: String
+    ): Call<ApiResponse>
+
+    @FormUrlEncoded
+    @POST("delete_account.php")
+    fun deleteAccount(
+        @Field("member_id") memberId: Int,
+        @Field("password") password: String
+    ): Call<ApiResponse>
+
+    @FormUrlEncoded
+    @POST("find_id.php")
+    fun findId(
+        @Field("username") username: String,
+        @Field("email") email: String
+    ): Call<FindIdResponse>
+
+    @FormUrlEncoded
+    @POST("find_password.php")
+    fun findPassword(
+        @Field("loginid") loginid: String,
+        @Field("email") email: String,
+        @Field("code") code: String
+    ): Call<ApiResponse>
+
+    @FormUrlEncoded
+    @POST("get_best_ranking.php")
+    fun getBestRanking(
+        @Field("month") month: String
+    ): Call<RankingResponse>
+
+    @FormUrlEncoded
+    @POST("get_worst_ranking.php")
+    fun getWorstRanking(
+        @Field("month") month: String
+    ): Call<RankingResponse>
+
+    @FormUrlEncoded
+    @POST("get_users_by_date.php")
+    fun getUsersByDate(
+        @Field("date") date: String
+    ): Call<RankingResponse>
+
+
+
 
 
 }
