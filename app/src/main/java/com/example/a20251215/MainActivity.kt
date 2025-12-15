@@ -16,6 +16,7 @@ class MainActivity : AppCompatActivity() {
             supportFragmentManager.beginTransaction()
                 .replace(R.id.home_container, HomeFragment())
                 .commit()
+
         }
     }
 }
