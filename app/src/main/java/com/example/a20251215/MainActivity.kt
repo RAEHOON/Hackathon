@@ -12,17 +12,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val loginBtn = findViewById<Button>(R.id.login_btn)
-        val signupBtn = findViewById<Button>(R.id.signup_btn)
-
-        loginBtn.setOnClickListener {
-            val intent = Intent(this, LoginActivity::class.java)
-            startActivity(intent)
-        }
-
-        signupBtn.setOnClickListener {
-            val intent = Intent(this, SignUpActivity::class.java)
-            startActivity(intent)
+        if (savedInstanceState == null) {
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.home_container, HomeFragment())
+                .commit()
         }
     }
 }
