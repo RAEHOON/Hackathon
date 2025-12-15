@@ -8,10 +8,12 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import com.example.a20251215.R
 import com.example.a20251215.Retrofit.ApiResponse
 import com.example.a20251215.Retrofit.RetrofitClient
+import com.google.android.material.textfield.TextInputLayout
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -28,32 +30,38 @@ class SignupNicknameFragment : Fragment() {
         val receivedName = arguments?.getString("username") ?: ""
         val receivedId = arguments?.getString("loginid") ?: ""
 
+        val tilNickname = view.findViewById<TextInputLayout>(R.id.til_nickname)
         val etNickname = view.findViewById<EditText>(R.id.et_nickname)
         val nextBtn = view.findViewById<Button>(R.id.btn_nickname_next)
         val receivedEmail = arguments?.getString("email") ?: ""
+
+        etNickname.addTextChangedListener {
+            tilNickname.error = null
+        }
 
         nextBtn.setOnClickListener {
             val inputNickname = etNickname.text.toString().trim()
 
             if (inputNickname.isEmpty()) {
-                Toast.makeText(context, "닉네임을 입력해주세요.", Toast.LENGTH_SHORT).show()
+                tilNickname.error = "닉네임을 입력해주세요."
                 return@setOnClickListener
             }
 
-            checkNicknameOnServer(inputNickname, receivedName, receivedId, receivedEmail)
+            checkNicknameOnServer(inputNickname, receivedName, receivedId, receivedEmail, tilNickname)
         }
     }
 
-    private fun checkNicknameOnServer(nickname: String, name: String, id: String, email: String) {
+    private fun checkNicknameOnServer(nickname: String, name: String, id: String, email: String, til: TextInputLayout) {
         RetrofitClient.apiService.checkNicknameDuplicate(nickname).enqueue(object : Callback<ApiResponse> {
             override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
                 if (response.isSuccessful && response.body()?.success == true) {
+                    til.error = null
                     Toast.makeText(context, "사용 가능한 닉네임입니다.", Toast.LENGTH_SHORT).show()
 
                     goToPasswordFragment(name, id, nickname, email)
                 } else {
                     val msg = response.body()?.message ?: "이미 사용 중인 닉네임입니다."
-                    Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                    til.error = msg
                 }
             }
 
