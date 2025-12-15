@@ -9,7 +9,21 @@
     <style name="Theme._20251215" parent="Base.Theme._20251215" />
 
     <style name="Theme.Splash" parent="Theme._20251215" >
-        <item name="android:windowIsTranslucent">true</item> // true => 투명처리
+        <item name="android:windowIsTranslucent">true</item>
+    </style>
+
+    <!-- Calendar TextAppearances -->
+    <style name="CalHeaderText" parent="TextAppearance.Material3.TitleMedium">
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="CalWeekdayText" parent="TextAppearance.Material3.BodySmall">
+        <item name="android:textColor">#B3FFFFFF</item>
+    </style>
+
+    <style name="CalDateText" parent="TextAppearance.Material3.BodyMedium">
+        <item name="android:textColor">@android:color/white</item>
     </style>
 
 </resources>
