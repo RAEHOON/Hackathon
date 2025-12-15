@@ -288,25 +288,6 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- ===== My Posts ===== -->
-
-        <TextView
-            android:id="@+id/tvMyPostsEmpty"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:alpha="0.7"
-            android:gravity="center"
-            android:padding="18dp"
-            android:text="아직 인증글이 없어요. 오늘 첫 인증을 올려볼까요?"
-            android:textColor="@android:color/white"
-            android:textSize="13sp"
-            android:visibility="gone"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintWidth_max="560dp"
-            tools:layout_editor_absoluteY="16dp" />
-
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.core.widget.NestedScrollView>
