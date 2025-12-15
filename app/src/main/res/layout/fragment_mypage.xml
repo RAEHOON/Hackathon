@@ -274,7 +274,8 @@
                     app:mcv_firstDayOfWeek="monday"
                     app:mcv_selectionMode="single"
                     app:mcv_calendarMode="month"
-
+                    app:mcv_leftArrow="@drawable/ic_mcv_left"
+                    app:mcv_rightArrow="@drawable/ic_mcv_right"
                     app:mcv_selectionColor="#7C4DFF"
                     app:mcv_headerTextAppearance="@style/CalHeaderText"
                     app:mcv_weekDayTextAppearance="@style/CalWeekdayText"
@@ -288,58 +289,23 @@
         </com.google.android.material.card.MaterialCardView>
 
         <!-- ===== My Posts ===== -->
-        <TextView
-            android:id="@+id/tvMyPostsTitle"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="내 인증글"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:textColor="@android:color/white"
-            android:layout_marginTop="16dp"
-            app:layout_constraintTop_toBottomOf="@id/cardCalendar"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintWidth_max="560dp"
-            app:layout_constraintHorizontal_bias="0.5" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvMyPosts"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:nestedScrollingEnabled="false"
-            android:clipToPadding="false"
-            app:layout_constraintTop_toBottomOf="@id/tvMyPostsTitle"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintWidth_max="560dp"
-            app:layout_constraintHorizontal_bias="0.5" />
 
         <TextView
             android:id="@+id/tvMyPostsEmpty"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="아직 인증글이 없어요. 오늘 첫 인증을 올려볼까요?"
-            android:textSize="13sp"
-            android:textColor="@android:color/white"
             android:alpha="0.7"
             android:gravity="center"
             android:padding="18dp"
+            android:text="아직 인증글이 없어요. 오늘 첫 인증을 올려볼까요?"
+            android:textColor="@android:color/white"
+            android:textSize="13sp"
             android:visibility="gone"
-            app:layout_constraintTop_toBottomOf="@id/tvMyPostsTitle"
-            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintWidth_max="560dp"
-            app:layout_constraintHorizontal_bias="0.5" />
-
-        <!-- bottom spacing -->
-        <View
-            android:layout_width="0dp"
-            android:layout_height="24dp"
-            app:layout_constraintTop_toBottomOf="@id/rvMyPosts"
+            app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintWidth_max="560dp"
+            tools:layout_editor_absoluteY="16dp" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
