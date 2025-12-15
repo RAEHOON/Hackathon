@@ -169,6 +169,14 @@ interface ApiService {
         @Field("date") date: String
     ): Call<RankingResponse>
 
+    @FormUrlEncoded
+    @POST("reset_password_by_email.php")
+    fun resetPasswordByEmail(
+        @Field("loginid") loginid: String,
+        @Field("email") email: String,
+        @Field("new_password") newPassword: String
+    ): Call<ApiResponse>
+
 
 
 
