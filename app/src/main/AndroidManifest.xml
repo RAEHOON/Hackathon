@@ -46,7 +46,7 @@
             android:name=".FindIdActivity"
             android:exported="false" />
         <activity
-            android:name=".SignUpActivity"
+            android:name=".Sign.SignUpActivity"
             android:exported="false" />
         <activity
             android:name=".LoginActivity"

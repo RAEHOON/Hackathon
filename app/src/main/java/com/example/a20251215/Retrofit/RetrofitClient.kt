@@ -1,4 +1,4 @@
-package com.example.a20251215
+package com.example.a20251215.Retrofit
 
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
