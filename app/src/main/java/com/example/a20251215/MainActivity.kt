@@ -3,9 +3,7 @@ package com.example.a20251215
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.a20251215.Sign.SignUpActivity
 
 
 class MainActivity : AppCompatActivity() {
@@ -18,7 +16,8 @@ class MainActivity : AppCompatActivity() {
         val signupBtn = findViewById<Button>(R.id.signup_btn)
 
         loginBtn.setOnClickListener {
-            Toast.makeText(this, "로그인 버튼 클릭", Toast.LENGTH_LONG).show()
+            val intent = Intent(this, LoginActivity::class.java)
+            startActivity(intent)
         }
 
         signupBtn.setOnClickListener {

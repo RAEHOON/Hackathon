@@ -5,6 +5,83 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".LoginActivity">
+    android:background="@color/main_black">
+
+    <ImageView
+        android:id="@+id/imageView2"
+        android:layout_width="90dp"
+        android:layout_height="90dp"
+        android:layout_marginTop="120dp"
+        android:src="@drawable/main_logo"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@color/white" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:text="로그인"
+        android:textColor="@color/main_white"
+        android:textSize="30sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageView2" />
+
+    <EditText
+        android:id="@+id/etemail"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginHorizontal="30dp"
+        android:layout_marginTop="60dp"
+        android:background="@drawable/login_round_white_box"
+        android:hint="이메일"
+        android:paddingStart="20dp"
+        android:textColorHint="@color/main_white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView2" />
+
+    <EditText
+        android:id="@+id/etpassword"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginHorizontal="30dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/login_round_white_box"
+        android:hint="비밀번호"
+        android:paddingStart="20dp"
+        android:textColorHint="@color/main_white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/etemail" />
+
+    <Button
+        android:id="@+id/login_btn"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:backgroundTint="@color/main_white"
+        android:text="로그인"
+        android:textColor="@color/main_black"
+        android:textSize="16sp"
+        android:layout_marginTop="50dp"
+        android:layout_marginHorizontal="30dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/etpassword" />
+
+    <TextView
+        android:id="@+id/signup_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="회원가입"
+        android:textSize="14sp"
+        android:textColor="@color/gray"
+        android:layout_marginTop="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/login_btn" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -2,17 +2,19 @@ package com.example.a20251215
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.example.a20251215.Sign.SignupEmailFragment
 
-class SignUpActivity : AppCompatActivity() {
+class HomeActivity  : AppCompatActivity(){
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_sign_up)
+        setContentView(R.layout.activity_home)
 
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
-                .add(R.id.fragment_container, SignupEmailFragment())
+                .replace(R.id.home_container, HomeFragment())
                 .commit()
         }
+
+
     }
 }
