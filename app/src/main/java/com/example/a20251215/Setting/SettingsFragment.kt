@@ -35,6 +35,12 @@ class SettingsFragment : Fragment() {
         val loginId = sharedPref.getString("login_id", "아이디 없음")
         val nickname = sharedPref.getString("nickname", "닉네임 없음")
         val email = sharedPref.getString("email", "이메일 없음")
+        val dialogView = LayoutInflater.from(requireContext())
+            .inflate(R.layout.custom_logout_dialog, null)
+
+        val dialog = AlertDialog.Builder(requireContext(), R.style.CustomAlertDialog)
+            .setView(dialogView)
+            .create()
 
 
         Log.d("SettingsFragment", "member_id: $memberId")
