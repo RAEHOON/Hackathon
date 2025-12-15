@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="@android:color/black">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/rootSettings"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <!-- ===== Header ===== -->
+        <ImageView
+            android:id="@+id/ivTopLogo"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:src="@drawable/splash"
+            android:tint="@android:color/white"
+            android:contentDescription="@string/app_name"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tvTopTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="오늘 공부했니?"
+            android:textColor="@android:color/white"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:layout_marginStart="8dp"
+            android:maxLines="1"
+            android:ellipsize="end"
+            app:layout_constraintStart_toEndOf="@id/ivTopLogo"
+            app:layout_constraintEnd_toStartOf="@id/tvPageLabel"
+            app:layout_constraintTop_toTopOf="@id/ivTopLogo"
+            app:layout_constraintBottom_toBottomOf="@id/ivTopLogo" />
+
+        <TextView
+            android:id="@+id/tvPageLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="SETTINGS"
+            android:textColor="@android:color/white"
+            android:textStyle="bold"
+            android:textSize="12sp"
+            android:alpha="0.7"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/ivTopLogo"
+            app:layout_constraintBottom_toBottomOf="@id/ivTopLogo" />
+
+        <!-- ===== Account Card ===== -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardAccount"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            app:cardCornerRadius="18dp"
+            app:cardUseCompatPadding="true"
+            app:cardBackgroundColor="#121212"
+            app:strokeWidth="1dp"
+            app:strokeColor="#2A2A2A"
+            app:layout_constraintTop_toBottomOf="@id/ivTopLogo"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintWidth_max="560dp"
+            app:layout_constraintHorizontal_bias="0.5">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="14dp">
+
+                <TextView
+                    android:id="@+id/tvAccountTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="내 계정"
+                    android:textColor="@android:color/white"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/tvAccountIdLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="아이디"
+                    android:textColor="@android:color/white"
+                    android:alpha="0.7"
+                    android:textSize="12sp"
+                    android:layout_marginTop="12dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tvAccountTitle" />
+
+                <TextView
+                    android:id="@+id/tvAccountIdValue"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="example_id"
+                    android:textColor="@android:color/white"
+                    android:textSize="14sp"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    app:layout_constraintStart_toEndOf="@id/tvAccountIdLabel"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBaseline_toBaselineOf="@id/tvAccountIdLabel"
+                    android:layout_marginStart="12dp"
+                    tools:text="isaac_2025" />
+
+                <TextView
+                    android:id="@+id/tvAccountSub"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="계정 정보 및 보안 설정"
+                    android:textColor="@android:color/white"
+                    android:alpha="0.7"
+                    android:textSize="12sp"
+                    android:layout_marginTop="10dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tvAccountIdLabel" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- ===== Actions Card ===== -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardActions"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            app:cardCornerRadius="18dp"
+            app:cardUseCompatPadding="true"
+            app:cardBackgroundColor="#121212"
+            app:strokeWidth="1dp"
+            app:strokeColor="#2A2A2A"
+            app:layout_constraintTop_toBottomOf="@id/cardAccount"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintWidth_max="560dp"
+            app:layout_constraintHorizontal_bias="0.5">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="8dp">
+
+                <!-- 닉네임 수정 -->
+                <TextView
+                    android:id="@+id/itemNickname"
+                    android:layout_width="0dp"
+                    android:layout_height="52dp"
+                    android:gravity="center_vertical"
+                    android:paddingStart="14dp"
+                    android:paddingEnd="14dp"
+                    android:text="닉네임 수정"
+                    android:textColor="@android:color/white"
+                    android:textSize="14sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <View
+                    android:id="@+id/divA"
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:background="#2A2A2A"
+                    app:layout_constraintTop_toBottomOf="@id/itemNickname"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+                <!-- 비밀번호 재설정 -->
+                <TextView
+                    android:id="@+id/itemPassword"
+                    android:layout_width="0dp"
+                    android:layout_height="52dp"
+                    android:gravity="center_vertical"
+                    android:paddingStart="14dp"
+                    android:paddingEnd="14dp"
+                    android:text="비밀번호 재설정"
+                    android:textColor="@android:color/white"
+                    android:textSize="14sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/divA" />
+
+                <View
+                    android:id="@+id/divB"
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:background="#2A2A2A"
+                    app:layout_constraintTop_toBottomOf="@id/itemPassword"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+                <!-- 로그아웃 -->
+                <TextView
+                    android:id="@+id/itemLogout"
+                    android:layout_width="0dp"
+                    android:layout_height="52dp"
+                    android:gravity="center_vertical"
+                    android:paddingStart="14dp"
+                    android:paddingEnd="14dp"
+                    android:text="로그아웃"
+                    android:textColor="@android:color/white"
+                    android:textSize="14sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/divB" />
+
+                <View
+                    android:id="@+id/divC"
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:background="#2A2A2A"
+                    app:layout_constraintTop_toBottomOf="@id/itemLogout"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+                <!-- 회원탈퇴 (위험/강조) -->
+                <TextView
+                    android:id="@+id/itemWithdraw"
+                    android:layout_width="0dp"
+                    android:layout_height="52dp"
+                    android:gravity="center_vertical"
+                    android:paddingStart="14dp"
+                    android:paddingEnd="14dp"
+                    android:text="회원탈퇴"
+                    android:textColor="#FF6B6B"
+                    android:textSize="14sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/divC" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.core.widget.NestedScrollView>

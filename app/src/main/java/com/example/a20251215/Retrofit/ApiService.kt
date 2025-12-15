@@ -1,6 +1,7 @@
 package com.example.a20251215.Retrofit
 
 import com.example.a20251215.LoginResponse
+import com.example.a20251215.Post.PostDetailResponse
 import com.example.a20251215.Post.PostListResponse
 import com.example.a20251215.Retrofit.ApiResponse
 import com.example.a20251215.Sign.SignupResponse
@@ -85,4 +86,31 @@ interface ApiService {
     fun getUserPosts(
         @Field("member_id") memberId: Int
     ): Call<PostListResponse>
+
+    @FormUrlEncoded
+    @POST("get_post_detail.php")
+    fun getPostDetail(
+        @Field("post_id") postId: Int
+    ): Call<PostDetailResponse>
+
+
+    @FormUrlEncoded
+    @POST("check_id.php")
+    fun checkIdDuplicate(
+        @Field("loginid") loginId: String
+    ): Call<ApiResponse>
+
+    @FormUrlEncoded
+    @POST("check_nickname.php")
+    fun checkNicknameDuplicate(
+        @Field("nickname") nickname: String
+    ): Call<ApiResponse>
+
+    @FormUrlEncoded
+    @POST("check_email.php")
+    fun checkEmailDuplicate(
+        @Field("email") email: String
+    ): Call<ApiResponse>
+
+
 }
