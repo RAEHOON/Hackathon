@@ -17,6 +17,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
+
         // 스플래시는 super.onCreate()보다 먼저!
         val splash = installSplashScreen()
         splash.setKeepOnScreenCondition { keepSplash }
