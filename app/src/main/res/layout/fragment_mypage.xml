@@ -267,6 +267,19 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
+                    android:padding="6dp"
+                    android:background="#121212"
+
+                    app:mcv_showOtherDates="none"
+                    app:mcv_firstDayOfWeek="monday"
+                    app:mcv_selectionMode="single"
+                    app:mcv_calendarMode="month"
+
+                    app:mcv_selectionColor="#7C4DFF"
+                    app:mcv_headerTextAppearance="@style/CalHeaderText"
+                    app:mcv_weekDayTextAppearance="@style/CalWeekdayText"
+                    app:mcv_dateTextAppearance="@style/CalDateText"
+
                     app:layout_constraintTop_toBottomOf="@id/tvCalendarHint"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent" />
