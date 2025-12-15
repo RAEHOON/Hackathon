@@ -40,10 +40,10 @@
             android:name=".UploadActivity"
             android:exported="false" />
         <activity
-            android:name=".FindPasswordActivity"
+            android:name=".Find.FindPasswordActivity"
             android:exported="false" />
         <activity
-            android:name=".FindIdActivity"
+            android:name=".Find.FindIdActivity"
             android:exported="false" />
         <activity
             android:name=".SignUpActivity"
