@@ -55,7 +55,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="헬로우월드 이삭5 재재수정!!!하이하이하이하ㄴㅁsdㅁㄴㅇㄹ이하이하이하이"
+        android:text="헬로우월드 이삭5 ㅋㅋㅋ"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.551"
