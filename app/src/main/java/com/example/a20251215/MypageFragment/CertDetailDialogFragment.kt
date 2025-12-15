@@ -15,6 +15,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
+import com.bumptech.glide.Glide
 import com.example.a20251215.Post.Post
 import com.example.a20251215.Post.PostListResponse
 import com.example.a20251215.R
@@ -329,12 +330,19 @@ class CertDetailDialogFragment : DialogFragment() {
     private fun renderImage(imageUrl: String?) {
         val iv = ivPhoto ?: return
         val url = imageUrl?.trim().orEmpty()
+
         if (url.isBlank()) {
             iv.setImageDrawable(null)
             return
         }
 
+        val fullUrl = "https://www.maribot.monster" + url
 
+        Glide.with(this)
+            .load(fullUrl)
+            .placeholder(R.drawable.error)
+            .error(R.drawable.error2)
+            .into(iv)
     }
 
     override fun onDestroyView() {
