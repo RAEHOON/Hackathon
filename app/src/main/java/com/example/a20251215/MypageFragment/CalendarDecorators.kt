@@ -9,7 +9,6 @@ import com.prolificinteractive.materialcalendarview.DayViewDecorator
 import com.prolificinteractive.materialcalendarview.DayViewFacade
 import org.threeten.bp.DayOfWeek
 
-/** ✅ 일요일: 무조건 빨강 */
 
 class SundayDecorator : DayViewDecorator {
     override fun shouldDecorate(day: CalendarDay): Boolean {
@@ -21,8 +20,7 @@ class SundayDecorator : DayViewDecorator {
     }
 }
 
-/** ✅ 공휴일: 빨강(+굵게는 옵션) */
-class HolidayDecorator(
+ class HolidayDecorator(
     private val holidays: Set<CalendarDay>
 ) : DayViewDecorator {
 

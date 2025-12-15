@@ -2,6 +2,7 @@ package com.example.a20251215.MypageFragment
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,10 +11,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.example.a20251215.R
-//import com.example.a20251215.holiday.HolidayDecorator
-//import com.example.a20251215.holiday.HolidayXmlParser
 import com.example.a20251215.holiday.KasiRetrofit
-//import com.example.a20251215.holiday.SundayDecorator
 import com.prolificinteractive.materialcalendarview.CalendarDay
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView
 import kotlinx.coroutines.Job
@@ -23,7 +21,12 @@ import kotlinx.coroutines.launch
 import org.threeten.bp.LocalDate
 
 class MypageFragment : Fragment() {
-    
+
+    companion object {
+        private const val TAG = "MYPAGE"
+        private const val PREF_NAME = "UserInfo"
+        private const val KEY_NICKNAME = "nickname"
+    }
 
     private var quoteJob: Job? = null
 
@@ -63,20 +66,22 @@ class MypageFragment : Fragment() {
         tvProfileSub = view.findViewById(R.id.tvProfileSub)
         calendarView = view.findViewById(R.id.calendarView)
 
-        tvNickname.text = loadNicknameFromPrefs()
+        Log.d(TAG, "onViewCreated() called")
+
+        val nick = loadNicknameFromPrefs()
+        tvNickname.text = nick
+        Log.d(TAG, "tvNickname set to '$nick'")
+
         startQuoteTicker_5sec()
 
-        // ✅ 첫 진입 시: 현재 달 로드
         val nowLocal: LocalDate = calendarView.currentDate.date
         loadAndDecorateMonth(nowLocal.year, nowLocal.monthValue)
 
-        // ✅ 월 변경 시: LocalDate로 정확히 뽑기 (month +1 같은거 안 해도 됨)
         calendarView.setOnMonthChangedListener { _, day ->
             val local: LocalDate = day.date
             loadAndDecorateMonth(local.year, local.monthValue)
         }
 
-        // ✅ 날짜 클릭 토스트
         calendarView.setOnDateChangedListener { _, day, _ ->
             val local: LocalDate = day.date
             Toast.makeText(
@@ -88,8 +93,13 @@ class MypageFragment : Fragment() {
     }
 
     private fun loadNicknameFromPrefs(): String {
-        val prefs = requireContext().getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
-        return prefs.getString("nickname", "닉네임") ?: "닉네임"
+        val prefs = requireContext().getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        val nick = prefs.getString(KEY_NICKNAME, null)
+
+        Log.d(TAG, "loadNicknameFromPrefs: file=$PREF_NAME nickname='$nick'")
+        Log.d(TAG, "prefs all = ${prefs.all}")
+
+        return nick ?: "닉네임"
     }
 
     private fun startQuoteTicker_5sec() {
@@ -100,7 +110,7 @@ class MypageFragment : Fragment() {
         quoteJob?.cancel()
         quoteJob = viewLifecycleOwner.lifecycleScope.launch {
             while (isActive) {
-                delay(5_000L) // ✅ 5초
+                delay(5_000L)
                 showNextQuoteWithSlideUp()
             }
         }
@@ -128,10 +138,8 @@ class MypageFragment : Fragment() {
     }
 
     private fun loadAndDecorateMonth(year: Int, month1to12: Int) {
-        // 1) 먼저 일요일 데코(기본)
         applyDecorators(year, month1to12, emptySet())
 
-        // 2) 공휴일 API → XML 파싱 → 공휴일 데코 추가
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val monthStr = String.format("%02d", month1to12)
@@ -148,7 +156,6 @@ class MypageFragment : Fragment() {
 
                 val holidays: Set<CalendarDay> = HolidayXmlParser.parse(xml)
                     .mapNotNull { item ->
-                        // locdate: YYYYMMDD
                         val raw = item.yyyymmdd
                         if (raw.length != 8) return@mapNotNull null
 
@@ -156,7 +163,6 @@ class MypageFragment : Fragment() {
                         val m = raw.substring(4, 6).toIntOrNull() ?: return@mapNotNull null
                         val d = raw.substring(6, 8).toIntOrNull() ?: return@mapNotNull null
 
-                        // ✅ 절대 Calendar를 LocalDate로 캐스팅하지 말기!
                         val local = LocalDate.of(y, m, d)
                         CalendarDay.from(local)
                     }
@@ -164,19 +170,15 @@ class MypageFragment : Fragment() {
 
                 applyDecorators(year, month1to12, holidays)
             } catch (e: Exception) {
-                // 네트워크/파싱 에러 안전 처리
-                // Toast는 원하면 켜도 됨
-                // Toast.makeText(requireContext(), "공휴일 로드 실패", Toast.LENGTH_SHORT).show()
+                Log.e(TAG, "loadAndDecorateMonth error: ${e.message}", e)
             }
         }
     }
 
     private fun applyDecorators(year: Int, month1to12: Int, holidays: Set<CalendarDay>) {
         calendarView.removeDecorators()
-
         calendarView.addDecorator(SundayDecorator())
 
-        // ✅ 공휴일 표시
         if (holidays.isNotEmpty()) {
             calendarView.addDecorator(HolidayDecorator(holidays))
         }
@@ -185,6 +187,16 @@ class MypageFragment : Fragment() {
     }
 
     private fun dp(value: Float): Float = value * resources.displayMetrics.density
+
+    override fun onResume() {
+        super.onResume()
+
+         if (!::tvNickname.isInitialized) return
+
+        val nick = loadNicknameFromPrefs()
+        tvNickname.text = nick
+        Log.d(TAG, "onResume() updated nickname='$nick'")
+    }
 
     override fun onDestroyView() {
         super.onDestroyView()
