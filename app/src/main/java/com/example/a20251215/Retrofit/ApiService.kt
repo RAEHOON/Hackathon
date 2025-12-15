@@ -19,7 +19,6 @@ interface ApiService {
         @Field("password") password: String
     ): Call<SignupResponse>
 
-
     @FormUrlEncoded
     @POST("send_code.php")
     fun sendEmailCode(
