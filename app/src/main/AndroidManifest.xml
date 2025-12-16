@@ -15,6 +15,9 @@
         android:theme="@style/Theme._20251215"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".HomePostDetailDialogFragment"
+            android:exported="false" />
+        <activity
             android:name=".WithdrawActivity"
             android:exported="false" />
         <activity
@@ -51,8 +54,9 @@
         <activity
             android:name=".SignUpActivity"
             android:exported="false" />
-        <activity android:name=".Post.WritePostActivity"
-            android:exported="false"/>
+        <activity
+            android:name=".Post.WritePostActivity"
+            android:exported="false" />
         <activity
             android:name=".MainActivity"
             android:exported="false" />

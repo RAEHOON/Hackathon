@@ -101,6 +101,8 @@ interface ApiService {
     ): Call<PostDetailResponse>
 
 
+
+
     @FormUrlEncoded
     @POST("check_id.php")
     fun checkIdDuplicate(
@@ -169,7 +171,7 @@ interface ApiService {
     ): Call<RankingResponse>
 
     @FormUrlEncoded
-    @POST("get_users_by_date.php")
+    @POST("get_user_by_date.php")
     fun getUsersByDate(
         @Field("date") date: String
     ): Call<RankingResponse>

@@ -28,6 +28,7 @@
         android:id="@+id/tvTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:minWidth="100dp"
         android:textColor="#DDDDDD"
         android:textSize="13sp"
         tools:text="액티비티왕"
