@@ -51,6 +51,7 @@ class PostDetailDialogFragment : DialogFragment() {
     private lateinit var tvDate: TextView
     private lateinit var ivImage: ImageView
     private lateinit var tvContent: TextView
+
     private lateinit var layoutActions: LinearLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
