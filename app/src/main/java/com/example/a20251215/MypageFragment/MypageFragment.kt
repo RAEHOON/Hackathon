@@ -314,18 +314,45 @@ class MypageFragment : Fragment() {
         quoteIndex = 0
         tvProfileSub.text = quotes[quoteIndex]
         tvProfileSub.alpha = 0.7f
+        tvProfileSub.translationY = 0f
 
         quoteJob?.cancel()
         quoteJob = viewLifecycleOwner.lifecycleScope.launch {
             while (isActive) {
                 delay(5_000L)
-                quoteIndex = (quoteIndex + 1) % quotes.size
-                tvProfileSub.text = quotes[quoteIndex]
+                showNextQuoteWithSlideUp()
             }
         }
     }
+    /** ✅ 뉴스/소식처럼: 위로 밀고(fade out) → 다음 문구를 아래에서 올림(fade in) */
+    private fun showNextQuoteWithSlideUp() {
+        val slide = dp(10f) // 올라가는 거리(원하면 8~14 정도로 조절)
 
-    override fun onDestroyView() {
+        // 애니메이션 겹침 방지
+        tvProfileSub.animate().cancel()
+
+        tvProfileSub.animate()
+            .translationY(-slide)
+            .alpha(0f)
+            .setDuration(220L)
+            .withEndAction {
+                // 다음 문구로 교체
+                quoteIndex = (quoteIndex + 1) % quotes.size
+                tvProfileSub.text = quotes[quoteIndex]
+
+                // 아래에서 시작
+                tvProfileSub.translationY = slide
+                tvProfileSub.animate()
+                    .translationY(0f)
+                    .alpha(0.7f)
+                    .setDuration(260L)
+                    .start()
+            }
+            .start()
+    }
+
+
+        override fun onDestroyView() {
         super.onDestroyView()
         quoteJob?.cancel()
         quoteJob = null
