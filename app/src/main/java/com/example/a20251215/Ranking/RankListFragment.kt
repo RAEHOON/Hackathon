@@ -28,9 +28,7 @@ class RankListFragment : Fragment() {
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View = inflater.inflate(R.layout.fragment_rank_list, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -46,10 +44,7 @@ class RankListFragment : Fragment() {
     }
 
     private fun loadRanking() {
-        // 로딩 표시
-        tvEmpty.visibility = View.VISIBLE
-        rv.visibility = View.GONE
-        tvEmpty.text = "불러오는 중..."
+        showMessage("불러오는 중...")
 
         val monthParam = YearMonth.now().toString() // "2025-12"
 
@@ -73,8 +68,7 @@ class RankListFragment : Fragment() {
                     return
                 }
 
-                // ✅ 서버 응답 -> UserScore로 변환
-                val rawScores: List<UserScore> = body.data.map {
+                 val raw = body.data.map {
                     UserScore(
                         userId = it.memberId,
                         name = it.nickname,
@@ -82,12 +76,9 @@ class RankListFragment : Fragment() {
                     )
                 }
 
-                // ✅ 동점/메달/빈상태 규칙 적용
-                val items = buildRankItems(rawScores, rankType)
+                 val items = buildRankItems(raw, rankType)
 
                 if (items.isEmpty()) {
-                    // BEST는 certCount>0 필터 후 empty면 "아무도 인증 안함" 케이스
-                    // WORST는 서버가 empty로 주면 여기로 들어옴
                     showMessage("이달의 공부왕을 도전해보세요!")
                 } else {
                     tvEmpty.visibility = View.GONE

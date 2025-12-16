@@ -1,18 +1,9 @@
 package com.example.a20251215.Ranking
 
-enum class RankType { BEST, WORST }
-
-data class UserScore(
-    val userId: Int,
-    val name: String,
-    val certCount: Int
-)
 
 fun buildRankItems(raw: List<UserScore>, type: RankType): List<RankItem> {
 
     val filtered = when (type) {
-
-
         RankType.BEST -> raw.filter { it.certCount > 0 }
         RankType.WORST -> raw
     }
@@ -32,7 +23,7 @@ fun buildRankItems(raw: List<UserScore>, type: RankType): List<RankItem> {
     var prevScore: Int? = null
 
     return sorted.map { u ->
-         if (prevScore == null || u.certCount != prevScore) rank += 1
+        if (prevScore == null || u.certCount != prevScore) rank += 1
         prevScore = u.certCount
 
         val badge = when (type) {
