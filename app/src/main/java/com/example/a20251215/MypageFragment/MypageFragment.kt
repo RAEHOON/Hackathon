@@ -58,6 +58,7 @@ class MypageFragment : Fragment() {
     private val KASI_SERVICE_KEY =
         "2b5ae7ad6f3c0c0d60f341541b0bd15c3a99e6a0c7145f7719d730a5726ffbeb"
 
+
     private val quotes = listOf(
         "오늘 포기하면, 내일도 똑같은 이유로 포기하게 된다.",
         "작은 꾸준함이 큰 변화를 만든다.",
