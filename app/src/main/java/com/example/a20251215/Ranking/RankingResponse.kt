@@ -12,5 +12,7 @@ data class RankingResponse(
 data class RankingItem(
     @SerializedName("member_id") val memberId: Int,
     @SerializedName("nickname") val nickname: String,
-    @SerializedName("upload_count") val uploadCount: Int
+    @SerializedName("upload_count") val uploadCount: Int,
+    @SerializedName("title") val title: String,
+    @SerializedName("post_id") val postId: Int
 )
