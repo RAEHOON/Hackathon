@@ -29,7 +29,6 @@ class MypageFragment : Fragment() {
 
     companion object {
         private const val TAG = "MYPAGE"
-
         private const val PREF_NAME = "UserInfo"
         private const val KEY_NICKNAME = "nickname"
 
