@@ -9,9 +9,11 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.widget.addTextChangedListener
 import com.example.a20251215.LoginActivity
 import com.example.a20251215.R
 import com.example.a20251215.Retrofit.RetrofitClient
+import com.google.android.material.textfield.TextInputLayout
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -21,21 +23,33 @@ class FindIdActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_find_id)
 
+        val tilName = findViewById<TextInputLayout>(R.id.til_find_username)
         val editText_name = findViewById<EditText>(R.id.find_username)
+
+        val tilEmail = findViewById<TextInputLayout>(R.id.til_find_email)
         val editText_email = findViewById<EditText>(R.id.find_email)
+
         val button_find = findViewById<Button>(R.id.find_id_btn)
         val button_back = findViewById<ImageView>(R.id.back_btn)
 
         button_back.setOnClickListener {
+            startActivity(Intent(this@FindIdActivity, LoginActivity::class.java))
             finish()
         }
+
+        editText_name.addTextChangedListener { tilName.error = null }
+        editText_email.addTextChangedListener { tilEmail.error = null }
 
         button_find.setOnClickListener {
             val name = editText_name.text.toString().trim()
             val email = editText_email.text.toString().trim()
 
-            if (name.isEmpty() || email.isEmpty()) {
-                Toast.makeText(this, "이름과 이메일을 모두 입력해주세요.", Toast.LENGTH_SHORT).show()
+            if (name.isEmpty()) {
+                tilName.error = "이름을 입력해주세요."
+                return@setOnClickListener
+            }
+            if (email.isEmpty()) {
+                tilEmail.error = "이메일을 입력해주세요."
                 return@setOnClickListener
             }
             findUserId(name, email)

@@ -80,11 +80,11 @@
             android:text="아이디 찾기"/>
 
         <ImageView
-            android:id="@+id/find_password_btn"
             android:layout_width="40dp"
             android:layout_height="20dp"/>
 
         <TextView
+            android:id="@+id/find_password_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="비밀번호 찾기"/>
