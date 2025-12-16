@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    kotlin("kapt")
 }
 
 android {
@@ -43,6 +44,8 @@ dependencies {
     implementation("com.github.prolificinteractive:material-calendarview:2.0.1")
     implementation("com.squareup.retrofit2:converter-scalars:2.11.0")
     implementation("com.jakewharton.threetenabp:threetenabp:1.4.6")
+    implementation("com.github.bumptech.glide:glide:4.15.1")
+    kapt("com.github.bumptech.glide:compiler:4.15.1")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)

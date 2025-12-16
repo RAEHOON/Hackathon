@@ -1,11 +1,8 @@
 package com.example.a20251215.Post
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
-import android.util.Base64
 import android.util.Log
 import android.view.View
 import android.widget.EditText
@@ -18,13 +15,14 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.a20251215.R
 import com.example.a20251215.Retrofit.ApiResponse
 import com.example.a20251215.Retrofit.RetrofitClient
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import java.io.ByteArrayOutputStream
-import java.io.InputStream
-import kotlin.text.isEmpty
-import kotlin.text.trim
+import java.io.File
 
 class WritePostActivity : AppCompatActivity() {
 
@@ -70,7 +68,7 @@ class WritePostActivity : AppCompatActivity() {
     }
 
     private fun uploadData(title: String, content: String) {
-        val sharedPref = getSharedPreferences("UserInfo", MODE_PRIVATE)
+        val sharedPref = getSharedPreferences("UserInfo", Context.MODE_PRIVATE)
         val memberId = sharedPref.getInt("member_id", -1)
 
         if (memberId == -1) {
@@ -78,68 +76,44 @@ class WritePostActivity : AppCompatActivity() {
             return
         }
 
-        var imageString = ""
-        if (selectedImageUri != null) {
-            imageString = uriToBase64(selectedImageUri!!)
+        val memberIdPart = memberId.toString().toRequestBody("text/plain".toMediaTypeOrNull())
+        val titlePart = title.toRequestBody("text/plain".toMediaTypeOrNull())
+        val contentPart = content.toRequestBody("text/plain".toMediaTypeOrNull())
+
+        var imagePart: MultipartBody.Part? = null
+
+        selectedImageUri?.let { uri ->
+            val inputStream = contentResolver.openInputStream(uri)
+            val tempFile = File.createTempFile("upload_", ".jpg", cacheDir)
+            tempFile.outputStream().use { output ->
+                inputStream?.copyTo(output)
+            }
+
+            val requestFile = tempFile.asRequestBody("image/*".toMediaTypeOrNull())
+            imagePart = MultipartBody.Part.createFormData("image", tempFile.name, requestFile)
         }
 
-        RetrofitClient.apiService.uploadPost(memberId, title, content, imageString)
-            .enqueue(object : Callback<ApiResponse> {
-                override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
-                    if (response.isSuccessful && response.body()?.success == true) {
-                        Toast.makeText(this@WritePostActivity, "업로드 성공!", Toast.LENGTH_SHORT).show()
-                        finish()
-                    } else {
-                        val msg = response.body()?.message ?: "서버 응답 없음"
-                        val errorBody = response.errorBody()?.string()
-                        Log.e("UploadFail", "Msg: $msg / ErrorBody: $errorBody")
-                    }
+        RetrofitClient.apiService.uploadPost(
+            memberIdPart,
+            titlePart,
+            contentPart,
+            imagePart
+        ).enqueue(object : Callback<ApiResponse> {
+            override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
+                if (response.isSuccessful && response.body()?.success == true) {
+                    Toast.makeText(this@WritePostActivity, "업로드 성공!", Toast.LENGTH_SHORT).show()
+                    finish()
+                } else {
+                    val msg = response.body()?.message ?: "서버 응답 없음"
+                    val errorBody = response.errorBody()?.string()
+                    Log.e("UploadFail", "Msg: $msg / ErrorBody: $errorBody")
+                    Toast.makeText(this@WritePostActivity, "업로드 실패: $msg", Toast.LENGTH_SHORT).show()
                 }
+            }
 
-                override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
-                    Toast.makeText(this@WritePostActivity, "통신 오류: ${t.message}", Toast.LENGTH_SHORT).show()
-                }
-            })
-    }
-
-    private fun uriToBase64(uri: Uri): String {
-        return try {
-            val inputStream: InputStream? = contentResolver.openInputStream(uri)
-            // 1. 원본 비트맵 읽기
-            val originalBitmap = BitmapFactory.decodeStream(inputStream)
-            inputStream?.close()
-
-            if (originalBitmap == null) return ""
-
-            // 2. 이미지 리사이징 (최대 너비/높이를 1024px로 제한)
-            val resizedBitmap = resizeBitmap(originalBitmap, 1024)
-
-            // 3. 압축 및 Base64 변환
-            val byteArrayOutputStream = ByteArrayOutputStream()
-            // 화질 70%로 압축 (글자 수 줄이기 위함)
-            resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 70, byteArrayOutputStream)
-            val byteArray = byteArrayOutputStream.toByteArray()
-
-            "data:image/jpeg;base64," + Base64.encodeToString(byteArray, Base64.DEFAULT)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            Log.e("ImageError", "이미지 변환 실패: ${e.message}")
-            ""
-        }
-    }
-
-    private fun resizeBitmap(bitmap: Bitmap, maxSize: Int): Bitmap {
-        var width = bitmap.width
-        var height = bitmap.height
-
-        val bitmapRatio = width.toFloat() / height.toFloat()
-        if (bitmapRatio > 1) {
-            width = maxSize
-            height = (width / bitmapRatio).toInt()
-        } else {
-            height = maxSize
-            width = (height * bitmapRatio).toInt()
-        }
-        return Bitmap.createScaledBitmap(bitmap, width, height, true)
+            override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
+                Toast.makeText(this@WritePostActivity, "통신 오류: ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
     }
 }
