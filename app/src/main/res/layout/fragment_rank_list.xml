@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvRank"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingTop="12dp"
+        android:paddingBottom="12dp"
+        android:clipToPadding="false" />
+
+    <TextView
+        android:id="@+id/tvEmptyRank"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:text="이달의 공부왕을 도전해보세요!"
+        android:textSize="16sp"
+        android:textColor="@android:color/white"
+        android:visibility="gone" />
+
+</FrameLayout>
