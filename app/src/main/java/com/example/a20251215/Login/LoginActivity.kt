@@ -7,6 +7,8 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.a20251215.Find.FindIdActivity
+import com.example.a20251215.Find.FindPasswordActivity
 import com.example.a20251215.Retrofit.ApiService
 import com.example.a20251215.Retrofit.RetrofitClient
 import retrofit2.Call
@@ -27,8 +29,21 @@ class LoginActivity : AppCompatActivity() {
         val loginBtn = findViewById<Button>(R.id.login_btn)
         val signupBtn = findViewById<TextView>(R.id.signup_btn)
 
+        val findIdBtn = findViewById<TextView>(R.id.find_id_btn)
+        val findPasswordBtn = findViewById<TextView>(R.id.find_password_btn)
+
         // Retrofit API 연결
         apiService = RetrofitClient.apiService
+
+        findIdBtn.setOnClickListener {
+            startActivity(Intent(this@LoginActivity, FindIdActivity::class.java))
+            finish()
+        }
+
+        findPasswordBtn.setOnClickListener {
+            startActivity(Intent(this@LoginActivity, FindPasswordActivity::class.java))
+            finish()
+        }
 
         // 로그인 버튼 클릭
         loginBtn.setOnClickListener {
