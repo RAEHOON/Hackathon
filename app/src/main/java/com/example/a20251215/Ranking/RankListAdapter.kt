@@ -31,6 +31,7 @@ class RankListAdapter : RecyclerView.Adapter<RankListAdapter.VH>() {
         holder.tvSub.text = item.sub
     }
 
+
     override fun getItemCount(): Int = items.size
 
     class VH(itemView: View) : RecyclerView.ViewHolder(itemView) {
