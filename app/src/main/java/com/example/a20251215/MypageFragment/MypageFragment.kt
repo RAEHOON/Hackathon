@@ -193,6 +193,7 @@ class MypageFragment : Fragment() {
 
     private fun rankLabel(monthCount: Int): String {
         return when {
+            monthCount == 0 -> "안 함"
             monthCount <= 5 -> "조금 함"
             monthCount <= 10 -> "하긴 함"
             monthCount <= 20 -> "많이 함"
@@ -323,8 +324,7 @@ class MypageFragment : Fragment() {
             }
         }
     }
-    /** ✅ 뉴스/소식처럼: 위로 밀고(fade out) → 다음 문구를 아래에서 올림(fade in) */
-    private fun showNextQuoteWithSlideUp() {
+     private fun showNextQuoteWithSlideUp() {
         val slide = dp(10f) // 올라가는 거리(원하면 8~14 정도로 조절)
 
         // 애니메이션 겹침 방지

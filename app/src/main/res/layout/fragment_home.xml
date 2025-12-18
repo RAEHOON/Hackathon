@@ -14,10 +14,10 @@
         android:layout_width="22dp"
         android:layout_height="22dp"
         android:src="@drawable/splash"
-        android:tint="@android:color/white"
         android:contentDescription="@string/app_name"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@android:color/white" />
 
     <TextView
         android:id="@+id/tvTopTitle"
@@ -138,23 +138,6 @@
                         tools:itemCount="6"
                         tools:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                         tools:listitem="@layout/fragment_home_item_user" />
-
-                    <!-- 미래 날짜일 때 -->
-                    <TextView
-                        android:id="@+id/tvEmptyState"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:text="내일 인증해주세요!"
-                        android:textColor="#FFFFFF"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:visibility="gone"
-                        app:layout_constraintTop_toBottomOf="@id/tvSectionTitle"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        tools:visibility="visible" />
 
                     <!-- + 버튼 (오늘만 보이게: 코드에서 제어) -->
                     <com.google.android.material.floatingactionbutton.FloatingActionButton

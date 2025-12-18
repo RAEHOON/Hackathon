@@ -41,7 +41,7 @@ class CertDetailDialogFragment : DialogFragment() {
         const val EXTRA_DATE = "date"
         const val EXTRA_POST_ID = "post_id"
 
-         const val REQ_EDIT_POST = "req_edit_post"
+        const val REQ_EDIT_POST = "req_edit_post"
         const val EDIT_ACTION = "edit_action" // "cancel" | "saved"
 
         fun newInstance(targetUserId: Int, myUserId: Int, date: LocalDate): CertDetailDialogFragment {
@@ -97,7 +97,7 @@ class CertDetailDialogFragment : DialogFragment() {
         val dateStr = requireArguments().getString(ARG_DATE) ?: LocalDate.now().toString()
         val isOwner = (targetUserId == myUserId)
 
-        cachedMemberId = targetUserId // owner면 myUserId랑 같음
+        cachedMemberId = targetUserId
         cachedDateStr = dateStr
         cachedIsOwner = isOwner
 
@@ -125,7 +125,7 @@ class CertDetailDialogFragment : DialogFragment() {
         layoutActions?.isVisible = isOwner
         setActionsEnabled(btnEdit, btnDelete, enabled = false)
 
-         parentFragmentManager.setFragmentResultListener(REQ_EDIT_POST, viewLifecycleOwner) { _, b ->
+        parentFragmentManager.setFragmentResultListener(REQ_EDIT_POST, viewLifecycleOwner) { _, b ->
             val action = b.getString(EDIT_ACTION, "")
             Log.d(TAG, "REQ_EDIT_POST received: action=$action -> close detail dialog")
             if (action == "cancel" || action == "saved") {
@@ -133,7 +133,7 @@ class CertDetailDialogFragment : DialogFragment() {
             }
         }
 
-         parentFragmentManager.setFragmentResultListener(
+        parentFragmentManager.setFragmentResultListener(
             EditPostDialogFragment.RESULT_KEY_EDIT_DONE,
             viewLifecycleOwner
         ) { _, b ->
@@ -187,6 +187,7 @@ class CertDetailDialogFragment : DialogFragment() {
         ivPhoto?.setImageDrawable(null)
 
         if (memberId <= 0) {
+            tvTitle?.text = "알림"
             tvContent?.text = "유저 정보(member_id)가 없어서 불러올 수 없어요"
             applyNoPostUi(isOwner)
             return
@@ -208,12 +209,14 @@ class CertDetailDialogFragment : DialogFragment() {
                 val body = response.body()
 
                 if (!response.isSuccessful || body == null) {
+                    tvTitle?.text = "불러오기 실패"
                     tvContent?.text = "불러오기 실패 (HTTP ${response.code()})"
                     applyNoPostUi(isOwner)
                     return
                 }
 
                 if (!body.success) {
+                    tvTitle?.text = "알림"
                     tvContent?.text = body.message
                     applyNoPostUi(isOwner)
                     return
@@ -221,8 +224,8 @@ class CertDetailDialogFragment : DialogFragment() {
 
                 val picked = pickPostByDate(body.data, dateStr)
                 if (picked == null) {
-                    tvContent?.text = "이 날짜에 인증한 게시글이 없어요 🙂"
-                    applyNoPostUi(isOwner)
+                    // ✅ 여기! “게시글 없음”은 날짜(과거/오늘/미래)로 문구 분기
+                    applyEmptyState(dateStr, isOwner)
                     return
                 }
 
@@ -241,6 +244,7 @@ class CertDetailDialogFragment : DialogFragment() {
 
             override fun onFailure(call: Call<PostListResponse>, t: Throwable) {
                 if (!isAdded) return
+                tvTitle?.text = "네트워크 오류"
                 tvContent?.text = "네트워크 오류: ${t.message ?: "unknown"}"
                 applyNoPostUi(isOwner)
             }
@@ -297,10 +301,64 @@ class CertDetailDialogFragment : DialogFragment() {
         parentFragmentManager.setFragmentResult(RESULT_KEY_POST_CHANGED, b)
     }
 
+    // =============================
+    // ✅ 빈 상태(게시글 없음) 문구 분기
+    // =============================
+    private enum class DateState { PAST, TODAY, FUTURE, UNKNOWN }
+
+    private fun getDateState(dateStr: String): DateState {
+        val clicked = runCatching { LocalDate.parse(dateStr) }.getOrNull() ?: return DateState.UNKNOWN
+        val today = LocalDate.now()
+
+        return when {
+            clicked.isAfter(today) -> DateState.FUTURE
+            clicked.isEqual(today) -> DateState.TODAY
+            else -> DateState.PAST
+        }
+    }
+
+    private fun applyEmptyState(dateStr: String, isOwner: Boolean) {
+        currentPost = null
+        ivPhoto?.setImageDrawable(null) // 큰 빈 프레임은 유지(네 UI처럼)
+
+        when (getDateState(dateStr)) {
+            DateState.FUTURE -> {
+                tvTitle?.text = "아직 이 날은 오지 않았어요 🙂"
+                tvContent?.text = "다가오면 잊지 말고 인증해요!"
+            }
+
+            DateState.TODAY -> {
+                tvTitle?.text = "오늘은 아직 인증이 없어요 🙂"
+                tvContent?.text = "지금 한 번 인증해볼까요?"
+            }
+
+            DateState.PAST -> {
+                tvTitle?.text = "이 날은 인증이 없었어요 🙂"
+                tvContent?.text = "다음엔 꼭 남겨보아요!"
+            }
+
+            DateState.UNKNOWN -> {
+                tvTitle?.text = "잠깐만요 🙂"
+                tvContent?.text = "날짜 정보를 확인할 수 없어요!"
+            }
+        }
+
+        // 버튼은 “동일 다이얼로그” 느낌 유지하면서 비활성만
+        if (isOwner) {
+            layoutActions?.isVisible = true
+            setActionsEnabled(btnEdit, btnDelete, enabled = false)
+        } else {
+            layoutActions?.isVisible = false
+        }
+    }
+
+    // =============================
+    // 기존: 단순 “글 없음” UI 처리
+    // (※ title을 강제로 "제목"으로 덮지 않도록 수정)
+    // =============================
     private fun applyNoPostUi(isOwner: Boolean) {
         currentPost = null
         ivPhoto?.setImageDrawable(null)
-        tvTitle?.text = "제목"
 
         if (isOwner) {
             layoutActions?.isVisible = true
