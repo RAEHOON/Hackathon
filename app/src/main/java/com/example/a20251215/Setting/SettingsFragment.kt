@@ -51,7 +51,7 @@ class SettingsFragment : Fragment() {
         // 텍스트뷰에 유저 정보 반영
         view.findViewById<TextView>(R.id.tvAccountTitle).text = username
         view.findViewById<TextView>(R.id.tvAccountIdValue).text = loginId
-        view.findViewById<TextView>(R.id.tvAccountSub).text = nickname
+        view.findViewById<TextView>(R.id.tvAccountSub2).text = nickname
 
         // 닉네임 수정
         view.findViewById<TextView>(R.id.itemNickname).setOnClickListener {

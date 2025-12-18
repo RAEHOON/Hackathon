@@ -20,6 +20,8 @@ class RankListFragment : Fragment() {
 
 
     private lateinit var rv: RecyclerView
+
+
     private lateinit var tvEmpty: TextView
     private val adapter = RankListAdapter()
 
