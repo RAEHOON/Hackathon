@@ -35,7 +35,8 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="30dp"
         android:layout_marginTop="20dp"
-        app:errorEnabled="true">
+        app:errorEnabled="true"
+        app:hintEnabled="false">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/et_nickname"
@@ -45,6 +46,7 @@
             android:inputType="textPersonName"
             android:background="@drawable/login_round_white_box"
             android:backgroundTint="#FFFFFF"
+            android:textColorHint="@color/dark_gray"
             android:textColor="@color/main_white" />
     </com.google.android.material.textfield.TextInputLayout>
 
