@@ -193,6 +193,7 @@ class MypageFragment : Fragment() {
 
     private fun rankLabel(monthCount: Int): String {
         return when {
+            monthCount == 0 -> "안 함"
             monthCount <= 5 -> "조금 함"
             monthCount <= 10 -> "하긴 함"
             monthCount <= 20 -> "많이 함"
