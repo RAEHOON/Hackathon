@@ -39,7 +39,8 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="30dp"
             android:layout_marginTop="20dp"
-            app:errorEnabled="true">
+            app:errorEnabled="true"
+            app:hintEnabled="false">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/et_find_email"
@@ -49,6 +50,7 @@
                 android:inputType="textEmailAddress"
                 android:background="@drawable/login_round_white_box"
                 android:backgroundTint="#FFFFFF"
+                android:textColorHint="@color/dark_gray"
                 android:textColor="@color/main_white" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -78,7 +80,8 @@
                     android:id="@+id/til_auth_code"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:errorEnabled="true">
+                    app:errorEnabled="true"
+                    app:hintEnabled="false">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/et_find_id_code"
@@ -89,6 +92,7 @@
                         android:maxLength="6"
                         android:background="@drawable/login_round_white_box"
                         android:backgroundTint="#FFFFFF"
+                        android:textColorHint="@color/dark_gray"
                         android:textColor="@color/main_white"
                         android:paddingEnd="60dp" />
                 </com.google.android.material.textfield.TextInputLayout>

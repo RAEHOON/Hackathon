@@ -35,7 +35,8 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="30dp"
         android:layout_marginTop="20dp"
-        app:errorEnabled="true">
+        app:errorEnabled="true"
+        app:hintEnabled="false">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/et_username"
@@ -45,7 +46,8 @@
             android:background="@drawable/login_round_white_box"
             android:textColor="@color/main_white"
             android:inputType="textPersonName"
-            android:backgroundTint="#FFFFFF" />
+            android:backgroundTint="#FFFFFF"
+            android:textColorHint="@color/dark_gray"/>
     </com.google.android.material.textfield.TextInputLayout>
 
     <Button
@@ -70,7 +72,8 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="30dp"
             android:layout_marginTop="20dp"
-            app:errorEnabled="true">
+            app:errorEnabled="true"
+            app:hintEnabled="false">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/et_user_id"
@@ -80,7 +83,8 @@
                 android:background="@drawable/login_round_white_box"
                 android:textColor="@color/main_white"
                 android:inputType="text"
-                android:backgroundTint="#FFFFFF" />
+                android:backgroundTint="#FFFFFF"
+                android:textColorHint="@color/dark_gray"/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <Button

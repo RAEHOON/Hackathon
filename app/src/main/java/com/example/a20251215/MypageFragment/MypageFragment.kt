@@ -29,7 +29,6 @@ class MypageFragment : Fragment() {
 
     companion object {
         private const val TAG = "MYPAGE"
-
         private const val PREF_NAME = "UserInfo"
         private const val KEY_NICKNAME = "nickname"
 
@@ -57,6 +56,7 @@ class MypageFragment : Fragment() {
 
     private val KASI_SERVICE_KEY =
         "2b5ae7ad6f3c0c0d60f341541b0bd15c3a99e6a0c7145f7719d730a5726ffbeb"
+
 
     private val quotes = listOf(
         "오늘 포기하면, 내일도 똑같은 이유로 포기하게 된다.",
@@ -314,18 +314,44 @@ class MypageFragment : Fragment() {
         quoteIndex = 0
         tvProfileSub.text = quotes[quoteIndex]
         tvProfileSub.alpha = 0.7f
+        tvProfileSub.translationY = 0f
 
         quoteJob?.cancel()
         quoteJob = viewLifecycleOwner.lifecycleScope.launch {
             while (isActive) {
                 delay(5_000L)
-                quoteIndex = (quoteIndex + 1) % quotes.size
-                tvProfileSub.text = quotes[quoteIndex]
+                showNextQuoteWithSlideUp()
             }
         }
     }
+     private fun showNextQuoteWithSlideUp() {
+        val slide = dp(10f) // 올라가는 거리(원하면 8~14 정도로 조절)
 
-    override fun onDestroyView() {
+        // 애니메이션 겹침 방지
+        tvProfileSub.animate().cancel()
+
+        tvProfileSub.animate()
+            .translationY(-slide)
+            .alpha(0f)
+            .setDuration(220L)
+            .withEndAction {
+                // 다음 문구로 교체
+                quoteIndex = (quoteIndex + 1) % quotes.size
+                tvProfileSub.text = quotes[quoteIndex]
+
+                // 아래에서 시작
+                tvProfileSub.translationY = slide
+                tvProfileSub.animate()
+                    .translationY(0f)
+                    .alpha(0.7f)
+                    .setDuration(260L)
+                    .start()
+            }
+            .start()
+    }
+
+
+        override fun onDestroyView() {
         super.onDestroyView()
         quoteJob?.cancel()
         quoteJob = null

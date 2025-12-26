@@ -35,6 +35,10 @@ class EditPostDialogFragment : DialogFragment() {
         private const val ARG_CONTENT = "arg_content"
         private const val ARG_IMAGE_URL = "arg_image_url"
 
+        private const val STATE_PICKED_URI = "state_picked_uri"
+
+         private const val IMAGE_BASE = "https://www.maribot.monster"
+
         const val RESULT_KEY_EDIT_DONE = "result_edit_done"
         const val EXTRA_EDIT_DONE_ACTION = "edit_done_action"
 
@@ -60,14 +64,49 @@ class EditPostDialogFragment : DialogFragment() {
     }
 
     private var callUpdate: Call<ApiResponse>? = null
+
     private var pickedImageUri: Uri? = null
     private var originImageUrl: String = ""
 
+    private fun resolveImageUrl(raw: String): String {
+        val s = raw.trim()
+        if (s.isBlank()) return ""
+        return if (s.startsWith("http")) s else IMAGE_BASE + s
+    }
+
+    private fun showPreview(iv: ImageView) {
+        // 1) 갤러리에서 새로 고른 게 있으면 그걸 우선 표시
+        pickedImageUri?.let { uri ->
+            Glide.with(this)
+                .load(uri)
+                .placeholder(R.drawable.error)
+                .error(R.drawable.error2)
+                .into(iv)
+            return
+        }
+
+        // 2) 아니면 기존(원본) 이미지 표시
+        val url = resolveImageUrl(originImageUrl)
+        if (url.isNotBlank()) {
+            Glide.with(this)
+                .load(url)
+                .placeholder(R.drawable.error)
+                .error(R.drawable.error2)
+                .into(iv)
+        } else {
+            // 원본도 없을 때(이미지 없는 글) 기본 처리
+            iv.setImageResource(R.drawable.error2)
+        }
+    }
+
     private val pickImageLauncher =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+            if (!isAdded) return@registerForActivityResult
             uri?.let {
                 pickedImageUri = it
-                view?.findViewById<ImageView>(R.id.ivEditPhoto)?.setImageURI(it)
+                val iv = view?.findViewById<ImageView>(R.id.ivEditPhoto)
+                if (iv != null) showPreview(iv)
+                view?.findViewById<MaterialButton>(R.id.btnPickImage)?.text = "사진 변경"
             }
         }
 
@@ -92,6 +131,10 @@ class EditPostDialogFragment : DialogFragment() {
         val originContent = requireArguments().getString(ARG_CONTENT, "")
         originImageUrl = requireArguments().getString(ARG_IMAGE_URL, "")
 
+         savedInstanceState?.getString(STATE_PICKED_URI)?.let {
+            runCatching { Uri.parse(it) }.getOrNull()?.let { uri -> pickedImageUri = uri }
+        }
+
         val etTitle = view.findViewById<EditText>(R.id.etTitle)
         val etContent = view.findViewById<EditText>(R.id.etContent)
         val ivEditPhoto = view.findViewById<ImageView>(R.id.ivEditPhoto)
@@ -105,12 +148,8 @@ class EditPostDialogFragment : DialogFragment() {
         etTitle.setText(originTitle)
         etContent.setText(originContent)
 
-        // 원본 이미지 표시
-        if (originImageUrl.isNotBlank()) {
-            Glide.with(this)
-                .load(originImageUrl)
-                .into(ivEditPhoto)
-        }
+         showPreview(ivEditPhoto)
+        btnPickImage.text = if (pickedImageUri != null) "사진 변경" else "사진 선택"
 
         fun setLoading(loading: Boolean) {
             overlay.visibility = if (loading) View.VISIBLE else View.GONE
@@ -164,7 +203,6 @@ class EditPostDialogFragment : DialogFragment() {
 
                     val requestFile = tempFile.asRequestBody("image/*".toMediaTypeOrNull())
                     imagePart = MultipartBody.Part.createFormData("image", tempFile.name, requestFile)
-
                 } catch (e: Exception) {
                     setLoading(false)
                     Toast.makeText(requireContext(), "이미지 처리 실패: ${e.message}", Toast.LENGTH_SHORT).show()
@@ -218,6 +256,11 @@ class EditPostDialogFragment : DialogFragment() {
                 }
             })
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putString(STATE_PICKED_URI, pickedImageUri?.toString())
     }
 
     override fun onDestroyView() {
