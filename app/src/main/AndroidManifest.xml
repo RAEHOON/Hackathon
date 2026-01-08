@@ -65,6 +65,9 @@
         <activity
             android:name=".MainActivity"
             android:exported="false" />
+        <activity
+            android:name=".Sign.ResetPasswordActivity"
+            android:exported="false"/>
     </application>
 
 </manifest>
